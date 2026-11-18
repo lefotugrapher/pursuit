@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<!--
+  Fixture modelled on jobs.ashbyhq.com/<org>/<id>/application. Ashby renders the form client-side
+  (the served HTML has no form), so this page builds it after a short delay. Uses Ashby's stable
+  class names: ashby-application-form-container / -field-entry / -question-title (required marked
+  by a _required_ class, not an asterisk in the text), a hidden file input behind an "Upload File"
+  button, Yes/No button pairs, "Submit Application", and the in-place
+  ashby-application-form-success-container. Also carries an invisible reCAPTCHA v3 badge, which is
+  passive and must not count as a blocker. Company and questions are fictional.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Content &amp; Community Executive @ Acme Comms</title>
+<style>
+  body { font-family: sans-serif; margin: 24px; }
+  .ashby-application-form-field-entry { margin: 14px 0; display: flex; flex-direction: column; }
+  ._required_q1 ::after, ._required_q1::after { content: "*"; color: #b00; }
+  ._yesno_hk143 button { padding: 6px 18px; margin-right: 6px; }
+  ._active_hk9 { background: #224; color: #fff; }
+  .grecaptcha-badge { width: 256px; height: 60px; position: fixed; bottom: 14px; right: -186px; box-shadow: 0 0 5px gray; }
+  textarea { width: 100%; }
+</style>
+<script src="/_harness.js"></script>
+</head>
+<body>
+<div id="root"><div class="_loading_">Loading…</div></div>
+<div class="grecaptcha-badge" data-style="bottomright"><div class="grecaptcha-logo"><iframe title="reCAPTCHA" src="about:blank" width="256" height="60" frameborder="0" scrolling="no"></iframe></div></div>
+
+<script>
+(function () {
+  var FIELDS = [
+    { kind: 'text', path: '_systemfield_name', label: 'Name', required: true },
+    { kind: 'email', path: '_systemfield_email', label: 'Email', required: true },
+    { kind: 'tel', path: '_systemfield_phone', label: 'Phone', required: false },
+    { kind: 'file', path: '_systemfield_resume', label: 'Resume', required: true },
+    { kind: 'text', path: 'b7e1c2a4-linkedin', label: 'LinkedIn Profile', required: false },
+    { kind: 'yesno', path: '4f0a2b9e-auth', label: 'Are you legally authorised to work in Ireland?', required: true },
+    { kind: 'yesno', path: '7c1d3e5f-relocate', label: 'Are you willing to work from our Dublin office three days a week?', required: true },
+    { kind: 'textarea', path: '9a8b7c6d-campaign', label: "Describe a campaign you'd pitch for our spring launch", required: true },
+  ];
+
+  function el(tag, attrs, text) {
+    var e = document.createElement(tag);
+    Object.keys(attrs || {}).forEach(function (k) { e.setAttribute(k, attrs[k]); });
+    if (text) e.textContent = text;
+    return e;
+  }
+
+  function render() {
+    var root = document.getElementById('root');
+    root.innerHTML = '';
+    var container = el('div', { class: 'ashby-application-form-container _container_ab12' });
+    var section = el('div', { class: 'ashby-application-form-section-container' });
+    container.appendChild(section);
+
+    FIELDS.forEach(function (f) {
+      var entry = el('div', { class: '_fieldEntry_17v6o_1 ashby-application-form-field-entry' });
+      var label = el('label', { class: '_heading_101oc_53 ' + (f.required ? '_required_q1 ' : '') + 'ashby-application-form-question-title', for: f.path }, f.label);
+      entry.appendChild(label);
+      if (f.kind === 'file') {
+        var box = el('div', { class: '_container_6k3nb_1 ashby-application-form-input-file' });
+        var input = el('input', { id: f.path, name: f.path, type: 'file', style: 'display:none' });
+        var btn = el('button', { type: 'button', class: '_button_8wvgw_29' });
+        btn.appendChild(el('span', {}, 'Upload File'));
+        btn.addEventListener('click', function () { input.click(); });
+        var hint = el('span', { class: '_instructions_' }, 'or drag and drop here');
+        var name = el('span', { class: '_filename_' });
+        input.addEventListener('change', function () { name.textContent = input.files.length ? input.files[0].name : ''; });
+        box.appendChild(input); box.appendChild(btn); box.appendChild(hint); box.appendChild(name);
+        entry.appendChild(box);
+      } else if (f.kind === 'yesno') {
+        var group = el('div', { class: '_yesno_hk143', 'data-yesno': f.path });
+        ['Yes', 'No'].forEach(function (v) {
+          var b = el('button', { type: 'button', class: '_option_hk7' }, v);
+          b.addEventListener('click', function () {
+            group.querySelectorAll('button').forEach(function (x) { x.className = '_option_hk7'; });
+            b.className = '_option_hk7 _active_hk9';
+            group.setAttribute('data-value', v);
+          });
+          group.appendChild(b);
+        });
+        entry.appendChild(group);
+      } else if (f.kind === 'textarea') {
+        entry.appendChild(el('textarea', { id: f.path, name: f.path, class: '_input_1wkz4_28 _textarea_1wkz4_47', placeholder: 'Type here...' }));
+      } else {
+        entry.appendChild(el('input', { id: f.path, name: f.path, type: f.kind, class: '_input_1wkz4_28', placeholder: f.kind === 'email' ? 'hello@example.com...' : 'Type here...' }));
+      }
+      section.appendChild(entry);
+    });
+
+    var failure = el('div', { class: 'ashby-application-form-failure-container', style: 'display:none' });
+    container.appendChild(failure);
+    var submit = el('button', { type: 'submit', class: '_button_8wvgw_29 _primary_8wvgw_92 ashby-application-form-submit-button' }, 'Submit Application');
+    container.appendChild(submit);
+    root.appendChild(container);
+
+    submit.addEventListener('click', function (e) {
+      e.preventDefault();
+      var missing = [];
+      FIELDS.forEach(function (f) {
+        if (!f.required) return;
+        var ok;
+        if (f.kind === 'yesno') ok = !!container.querySelector('[data-yesno="' + f.path + '"]').getAttribute('data-value');
+        else if (f.kind === 'file') ok = document.getElementById(f.path).files.length > 0;
+        else ok = !!document.getElementById(f.path).value.trim();
+        if (!ok) missing.push(f.label);
+      });
+      if (missing.length) {
+        failure.style.display = 'block';
+        failure.textContent = 'Your form needs corrections: ' + missing.join(', ');
+        return;
+      }
+      window.__send('ashby', window.__collect(container)).then(function () {
+        root.innerHTML = '<div class="ashby-application-form-success-container"><h2>Thank you for applying</h2>' +
+          '<p>Your application was successfully submitted. We’ll contact you if there are next steps.</p></div>';
+      });
+    });
+  }
+
+  setTimeout(render, 300);
+})();
+</script>
+</body>
+</html>

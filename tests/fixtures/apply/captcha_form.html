@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<!--
+  Lever-style application page where the hCaptcha widget is VISIBLE (a checkbox challenge rendered in
+  the form), which the runner must hand off without filling past it or clicking submit. The iframe
+  points at about:blank: tests never load anything from hcaptcha.com.
+-->
+<html lang="en" data-fixture="captcha">
+<head>
+<meta charset="utf-8">
+<title>Acme Comms - Social Media Executive</title>
+<style>
+  body { font-family: sans-serif; margin: 24px; }
+  .application-question { list-style: none; margin: 10px 0; }
+  .invisible-resume-upload { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .h-captcha iframe { width: 303px; height: 78px; border: 1px solid #ccc; }
+</style>
+<script src="/_harness.js"></script>
+</head>
+<body>
+<div class="posting-headline"><h2>Social Media Executive</h2></div>
+<form id="application-form" enctype="multipart/form-data" method="POST">
+  <div class="section page-centered application-form"><h4>Submit your application</h4>
+  <ul>
+    <li class="application-question resume"><label>
+      <div class="application-label">Resume/CV <span class="required">✱</span></div>
+      <div class="application-field"><a href="#" class="postings-btn template-btn-utility visible-resume-upload"><span class="default-label">ATTACH RESUME/CV</span>
+        <input class="application-file-input invisible-resume-upload" data-qa="input-resume" id="resume-upload-input" name="resume" tabindex="-1" type="file"></a></div></label></li>
+    <li class="application-question"><label><div class="application-label">Full name<span class="required">✱</span></div><div class="application-field"><input type="text" data-qa="name-input" name="name" required></div></label></li>
+    <li class="application-question"><label><div class="application-label">Email<span class="required">✱</span></div><div class="application-field"><input name="email" data-qa="email-input" type="email" required></div></label></li>
+    <li class="application-question"><label><div class="application-label">Phone </div><div class="application-field"><input type="text" data-qa="phone-input" name="phone"></div></label></li>
+  </ul></div>
+  <div class="section page-centered application-form"><label for="additional-information"><h4>Additional information</h4></label>
+    <div class="application-additional"><textarea placeholder="Add a cover letter or anything else you want to share." name="comments" id="additional-information"></textarea></div></div>
+  <input id="hcaptchaResponseInput" type="hidden" name="h-captcha-response" value="">
+  <div id="h-captcha" class="h-captcha" data-sitekey="10000000-ffff-ffff-ffff-000000000001">
+    <iframe src="about:blank" title="Widget containing checkbox for hCaptcha security challenge" tabindex="0" frameborder="0" scrolling="no"></iframe>
+  </div>
+  <div class="section page-centered application-form last-section-apply">
+    <button id="btn-submit" type="button" class="postings-btn template-btn-submit black" data-qa="btn-submit">Submit application</button></div>
+</form>
+<script>
+  document.getElementById('btn-submit').addEventListener('click', function () {
+    window.__submitClicked = true;
+    window.__send('captcha', { clicked: true });
+  });
+</script>
+</body>
+</html>

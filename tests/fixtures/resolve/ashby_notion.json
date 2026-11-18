@@ -1,0 +1,83 @@
+{
+ "_note": "Trimmed real response from https://api.ashbyhq.com/posting-api/job-board/notion (2026-11-16).",
+ "apiVersion": "1",
+ "jobs": [
+  {
+   "id": "886bb3d2-45ac-45c6-ae21-62ba0b905b3c",
+   "title": "Outcomes Architect Manager",
+   "department": "Outcomes Architect",
+   "team": "Outcomes Architect",
+   "employmentType": "FullTime",
+   "location": "Dublin, Ireland",
+   "secondaryLocations": [],
+   "publishedAt": "2026-10-23T14:46:06.128+00:00",
+   "isListed": true,
+   "isRemote": null,
+   "workplaceType": null,
+   "address": {
+    "postalAddress": {
+     "addressRegion": "Ireland",
+     "addressCountry": "Ireland",
+     "addressLocality": "Dublin"
+    }
+   },
+   "jobUrl": "https://jobs.ashbyhq.com/notion/886bb3d2-45ac-45c6-ae21-62ba0b905b3c",
+   "applyUrl": "https://jobs.ashbyhq.com/notion/886bb3d2-45ac-45c6-ae21-62ba0b905b3c/application"
+  },
+  {
+   "id": "8d2532a9-a1a8-48ec-8de3-b3646bd70423",
+   "title": "Business Development Representative, CEE",
+   "department": "Sales",
+   "team": "Sales",
+   "employmentType": "FullTime",
+   "location": "Dublin, Ireland",
+   "secondaryLocations": [],
+   "publishedAt": "2026-10-30T17:01:17.177+00:00",
+   "isListed": true,
+   "isRemote": null,
+   "workplaceType": null,
+   "address": {
+    "postalAddress": {
+     "addressRegion": "Ireland",
+     "addressCountry": "Ireland",
+     "addressLocality": "Dublin"
+    }
+   },
+   "jobUrl": "https://jobs.ashbyhq.com/notion/8d2532a9-a1a8-48ec-8de3-b3646bd70423",
+   "applyUrl": "https://jobs.ashbyhq.com/notion/8d2532a9-a1a8-48ec-8de3-b3646bd70423/application"
+  },
+  {
+   "id": "1fc309c8-da20-4ff2-84c7-8b863ece2b0a",
+   "title": "Software Engineer, AI Connections (Developer Platform)",
+   "department": "Engineering",
+   "team": "Engineering",
+   "employmentType": "FullTime",
+   "location": "San Francisco, California",
+   "secondaryLocations": [
+    {
+     "location": "New York, New York",
+     "address": {
+      "postalAddress": {
+       "addressRegion": "New York",
+       "addressCountry": "United States",
+       "addressLocality": "New York"
+      }
+     }
+    }
+   ],
+   "publishedAt": "2026-08-24T14:44:49.699+00:00",
+   "isListed": true,
+   "isRemote": true,
+   "workplaceType": "Hybrid",
+   "address": {
+    "postalAddress": {
+     "addressRegion": "California",
+     "addressCountry": "United States",
+     "addressLocality": "San Francisco"
+    }
+   },
+   "jobUrl": "https://jobs.ashbyhq.com/notion/1fc309c8-da20-4ff2-84c7-8b863ece2b0a",
+   "applyUrl": "https://jobs.ashbyhq.com/notion/1fc309c8-da20-4ff2-84c7-8b863ece2b0a/application"
+  }
+ ]
+}

@@ -1,0 +1,22 @@
+{
+ "_note": "Trimmed real response from https://api.smartrecruiters.com/v1/companies/RyanairGroupHoldings/postings/744000151798952 (2026-11-16).",
+ "id": "744000151798952",
+ "name": "PR and Communications Executive",
+ "company": {
+  "name": "Ryanair Group Holdings",
+  "identifier": "RyanairGroupHoldings"
+ },
+ "location": {
+  "city": "Swords, Dublin",
+  "country": "ie",
+  "address": "Lakeview Drive, Airside Business Park, Swords, Dublin, K67 NY94",
+  "postalCode": "K67 NY94",
+  "remote": false,
+  "hybrid": false,
+  "fullLocation": "Swords, Dublin, , Ireland"
+ },
+ "postingUrl": "https://jobs.smartrecruiters.com/RyanairGroupHoldings/744000151798952-pr-and-communications-executive",
+ "applyUrl": "https://jobs.smartrecruiters.com/RyanairGroupHoldings/744000151798952-pr-and-communications-executive?oga=true",
+ "active": true,
+ "releasedDate": "2026-09-25T09:15:29.543Z"
+}

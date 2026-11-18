@@ -1,0 +1,65 @@
+{
+ "_note": "Trimmed real response from https://boards-api.greenhouse.io/v1/boards/tines/jobs (2026-11-16).",
+ "jobs": [
+  {
+   "absolute_url": "https://job-boards.greenhouse.io/tines/jobs/6226583004",
+   "internal_job_id": 5229616004,
+   "location": {
+    "name": "United States (Remote)"
+   },
+   "id": 6226583004,
+   "updated_at": "2026-11-12T06:47:18-05:00",
+   "requisition_id": "818",
+   "title": "Account Based Marketing (ABM) Manager",
+   "company_name": "Tines",
+   "first_published": "2026-10-16T10:18:40-04:00",
+   "language": "en",
+   "application_deadline": null
+  },
+  {
+   "absolute_url": "https://job-boards.greenhouse.io/tines/jobs/6250067004",
+   "internal_job_id": 5237017004,
+   "location": {
+    "name": "United States (Remote)"
+   },
+   "id": 6250067004,
+   "updated_at": "2026-11-04T22:19:18-05:00",
+   "requisition_id": "833",
+   "title": "Area Vice President of Sales - East",
+   "company_name": "Tines",
+   "first_published": "2026-11-04T22:19:18-05:00",
+   "language": "en",
+   "application_deadline": null
+  },
+  {
+   "absolute_url": "https://job-boards.greenhouse.io/tines/jobs/6236071004",
+   "internal_job_id": 5232753004,
+   "location": {
+    "name": "Boston, MA (Hybrid)"
+   },
+   "id": 6236071004,
+   "updated_at": "2026-10-27T09:44:34-04:00",
+   "requisition_id": "826",
+   "title": "Business Development Representative",
+   "company_name": "Tines",
+   "first_published": "2026-10-27T09:42:40-04:00",
+   "language": "en",
+   "application_deadline": null
+  },
+  {
+   "absolute_url": "https://job-boards.greenhouse.io/tines/jobs/6231156004",
+   "internal_job_id": 5231098004,
+   "location": {
+    "name": "Ireland (Remote)"
+   },
+   "id": 6231156004,
+   "updated_at": "2026-10-22T05:34:16-04:00",
+   "requisition_id": "825",
+   "title": "Customer Success Manager II - EMEA",
+   "company_name": "Tines",
+   "first_published": "2026-10-21T12:40:28-04:00",
+   "language": "en",
+   "application_deadline": null
+  }
+ ]
+}

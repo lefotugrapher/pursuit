@@ -1,0 +1,11 @@
+{
+  "expect": { "kind": "job_alert" },
+  "email": {
+    "messageId": "<alert-2@indeed.example>",
+    "from": "Indeed <alert@indeed.com>",
+    "fromAddress": "alert@indeed.com",
+    "subject": "15 new marketing executive jobs in Dublin",
+    "date": "2025-11-12T06:00:00.000Z",
+    "text": "Marketing Executive\nCairn Foods - Dublin, County Dublin\nhttps://ie.indeed.com/viewjob?jk=a1b2c3d4e5f60718\n\nUnsubscribe"
+  }
+}

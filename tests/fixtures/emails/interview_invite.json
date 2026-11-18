@@ -1,0 +1,11 @@
+{
+  "expect": { "kind": "interview", "company": "Acme Comms" },
+  "email": {
+    "messageId": "<interview-1@acmecomms.example>",
+    "from": "Sarah Kelly <sarah.kelly@acmecomms.ie>",
+    "fromAddress": "sarah.kelly@acmecomms.ie",
+    "subject": "Interview: PR Executive",
+    "date": "2025-11-12T09:30:00.000Z",
+    "text": "Hi Kshitiz,\n\nThanks for applying for the PR Executive role at Acme Comms. We'd like to invite you to an interview with our Head of Communications.\n\nWould Tuesday 18th November at 2pm work for you? If not, please let us know your availability.\n\nBest,\nSarah Kelly\nTalent Partner, Acme Comms"
+  }
+}

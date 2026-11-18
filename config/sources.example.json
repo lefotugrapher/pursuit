@@ -1,0 +1,63 @@
+{
+  "companies": [
+    {
+      "name": "Stripe",
+      "ats": "greenhouse",
+      "token": "stripe",
+      "enabled": true,
+      "tags": ["fintech", "ie-office", "irish-hq"],
+      "verifiedAt": "2026-11-15"
+    },
+    {
+      "name": "Web Summit",
+      "ats": "lever",
+      "token": "websummit",
+      "enabled": true,
+      "tags": ["events", "ie-office", "irish-hq"],
+      "verifiedAt": "2026-11-15"
+    },
+    {
+      "name": "Primark",
+      "ats": "smartrecruiters",
+      "token": "Primark",
+      "enabled": true,
+      "tags": ["retail", "ie-office", "ni-office", "irish-hq"],
+      "verifiedAt": "2026-11-15"
+    }
+  ],
+  "linkedinGuest": {
+    "enabled": true,
+    "queries": [
+      { "keywords": "marketing executive", "location": "Dublin, Ireland" },
+      { "keywords": "communications executive", "location": "Ireland" },
+      { "keywords": "digital marketing", "location": "Dundalk, Ireland" },
+      { "keywords": "marketing executive", "location": "Belfast, United Kingdom" }
+    ],
+    "maxPerQuery": 50,
+    "minIntervalMs": 3000
+  },
+  "adzuna": {
+    "enabled": false,
+    "queries": [
+      { "what": "marketing executive", "where": "Dublin", "country": "ie" },
+      { "what": "marketing executive", "where": "Belfast", "country": "gb" }
+    ]
+  },
+  "gmailAlerts": { "enabled": true },
+  "titleMustMatch": [
+    "marketing", "marketer", "communication", "comms", "public relations", "public affairs",
+    "pr &", "pr and", "pr/", "(pr)", "pr,", "pr -", "pr executive", "pr manager", "pr officer", "pr account",
+    "pr assistant", "pr coordinator", "pr specialist", "pr associate", "pr intern", "pr lead", "pr consultant",
+    "press office", "press relations", "press release", "press assistant", "press secretary", "press &", "press and",
+    "publicist", "publicity",
+    "social", "media relations", "media executive", "media officer", "media manager", "media assistant",
+    "media coordinator", "media specialist", "media buyer", "media planner", "media producer", "paid media",
+    "multimedia", "media &", "media and",
+    "content", "brand", "digital", "campaign", "creative", "creator", "influencer", "seo", "demand gen",
+    "copywrit", "speechwrit", "staff writer", "ux writer",
+    "editorial", "video editor", "copy editor", "news editor", "web editor", "sub-editor", "sub editor",
+    "events", "event coordinator", "event manager", "event executive", "event marketing", "event producer",
+    "event planner", "event assistant", "event specialist", "event operations", "event lead",
+    "engagement", "community", "partnership", "sponsorship", "graduate", "internship"
+  ]
+}

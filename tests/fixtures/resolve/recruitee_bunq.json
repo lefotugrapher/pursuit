@@ -1,0 +1,29 @@
+{
+ "_note": "Trimmed real response from https://bunq.recruitee.com/api/offers (2026-11-16).",
+ "offers": [
+  {
+   "id": 2823928,
+   "title": "Security Engineer",
+   "company_name": "bunq",
+   "careers_url": "https://careers.bunq.com/o/security-engineer-3",
+   "careers_apply_url": "https://careers.bunq.com/o/security-engineer-3/c/new",
+   "location": "Amsterdam, Noord-Holland, Netherlands",
+   "city": "Amsterdam",
+   "country": "Netherlands",
+   "remote": false,
+   "status": "published"
+  },
+  {
+   "id": 2821648,
+   "title": "Reporting Agent (France)",
+   "company_name": "bunq",
+   "careers_url": "https://careers.bunq.com/o/reporting-agent-france-3",
+   "careers_apply_url": "https://careers.bunq.com/o/reporting-agent-france-3/c/new",
+   "location": "Remote job",
+   "city": "Paris",
+   "country": "France",
+   "remote": true,
+   "status": "published"
+  }
+ ]
+}

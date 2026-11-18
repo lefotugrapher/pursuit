@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<!--
+  A company career page with no ATS: generic cookie banner (Accept all / Reject non-essential), a
+  header site search and a footer newsletter box (neither is the application), and an "Apply now"
+  link to the company's own multi-step form. Fictional company. ?variant= is carried to the form.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>PR Executive | Careers | Acme Comms</title>
+<style>
+  body { font-family: sans-serif; margin: 0; }
+  header, main, footer { padding: 16px 24px; }
+  #cookie-banner { position: fixed; bottom: 0; left: 0; right: 0; background: #eee; padding: 12px; }
+  .btn { display: inline-block; padding: 8px 16px; background: #24a; color: #fff; text-decoration: none; }
+</style>
+<script src="/_harness.js"></script>
+</head>
+<body>
+<header><form role="search" action="/search"><input type="search" name="q" placeholder="Search the site"><button type="submit">Search</button></form></header>
+<main>
+  <h1>PR Executive</h1>
+  <p>Dublin · Full-time · Communications</p>
+  <p>Acme Comms is hiring a PR Executive to look after media relations and social content.</p>
+  <a class="btn" id="apply-link" href="/careers/acme-comms/pr-executive/apply">Apply now</a>
+</main>
+<footer>
+  <form id="newsletter"><label for="nl-email">Get our newsletter</label> <input id="nl-email" type="email" name="newsletter_email"> <button type="submit">Subscribe</button></form>
+</footer>
+<div id="cookie-banner" class="cookie-consent" role="dialog" aria-label="Cookie consent">
+  We use cookies. <button id="cookie-accept">Accept all</button> <button id="cookie-reject">Reject non-essential</button>
+</div>
+<script>
+  document.getElementById('apply-link').href += location.search;
+  document.getElementById('cookie-accept').addEventListener('click', function () { document.getElementById('cookie-banner').remove(); window.__send('company-cookies', { choice: 'accept' }); });
+  document.getElementById('cookie-reject').addEventListener('click', function () { document.getElementById('cookie-banner').remove(); window.__send('company-cookies', { choice: 'reject' }); });
+  document.getElementById('newsletter').addEventListener('submit', function (e) { e.preventDefault(); window.__send('newsletter', { subscribed: true }); });
+</script>
+</body>
+</html>

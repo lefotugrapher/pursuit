@@ -1,0 +1,56 @@
+{
+  "name": {
+    "first": "Jane",
+    "last": "Doe",
+    "preferred": "Jane",
+    "full": "Jane Doe"
+  },
+  "email": "jane.doe@example.com",
+  "phone": "+353 1 555 0100",
+  "location": "Exampletown, Co. Example, Ireland",
+  "links": {
+    "linkedin": "https://www.linkedin.com/in/jane-doe-example",
+    "portfolio": "https://portfolio.example.com"
+  },
+  "targets": {
+    "roles": [
+      "Communications Executive",
+      "Communications Assistant",
+      "Content Executive",
+      "Social Media Executive",
+      "Marketing Executive",
+      "Graduate Marketing Programme"
+    ],
+    "keywords": [
+      "communications executive",
+      "content executive",
+      "social media executive",
+      "marketing executive",
+      "graduate marketing"
+    ],
+    "locations": ["dublin", "cork", "ireland", "remote"],
+    "secondaryLocations": ["belfast", "northern ireland"],
+    "remoteOk": true,
+    "seniority": ["intern", "graduate", "junior", "executive"],
+    "excludeTitleWords": ["senior", "sr.", "head of", "director", "lead", "principal", "chief", "vice president"],
+    "maxYearsRequired": 2,
+    "salaryFloorEUR": 30000,
+    "blacklistCompanies": ["Example Corp"],
+    "languages": ["English"]
+  },
+  "workAuth": {
+    "summary": "Example only: describe your right to work here. Used in application forms, never on the CV.",
+    "needsSponsorship": null,
+    "confirm": true
+  },
+  "coverLetter": {
+    "signOff": "Kind Regards,\nJane",
+    "voiceNotes": [
+      "Plain, direct language.",
+      "Use contractions.",
+      "No em dashes as punctuation.",
+      "Short paragraphs; under 250 words in total.",
+      "No buzzwords: passionate, dynamic, leverage, results-driven."
+    ]
+  }
+}

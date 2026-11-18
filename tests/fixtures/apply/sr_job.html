@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<!--
+  Fixture modelled on a live jobs.smartrecruiters.com/{Company}/{postingId}-{slug} job page (fetched
+  Nov 2026, Primark posting 744000161476800): OneTrust cookie banner (#onetrust-banner-sdk with
+  #onetrust-reject-all-handler / #onetrust-accept-btn-handler), job ad sections, and several
+  "I'm interested" buttons (a.js-oneclick, data-sr-track="apply", no href) whose script opens
+  /oneclick-ui/company/{Company}/publication/{uuid}?dcr_ci={Company}. Company and job are fictional.
+  The query string (?variant=...) is carried to the application page.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>PR Executive | Acme Comms | SmartRecruiters</title>
+<style>
+  body { font-family: sans-serif; margin: 0; }
+  .job-header { padding: 24px; }
+  #onetrust-banner-sdk { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 2px solid #333; padding: 16px; z-index: 1000; }
+  .button { display: inline-block; padding: 10px 20px; background: #1d6; cursor: pointer; margin: 8px 0; }
+  .hidden { display: none; }
+</style>
+<script src="/_harness.js"></script>
+</head>
+<body>
+<header class="job-header">
+  <h1 class="job-title" itemprop="title">PR Executive</h1>
+  <ul class="job-details"><li itemprop="jobLocation">Dublin, Ireland</li><li>Full-time</li></ul>
+  <a class="button button--primary button--huge js-oneclick button--block" data-sr-track="apply" data-sr-track-position="header" tabindex="-1" aria-hidden="true">I'm interested</a>
+</header>
+<main class="jobad-main">
+  <section id="st-companyDescription"><h2>Company Description</h2><p>Acme Comms is a communications agency.</p></section>
+  <section id="st-jobDescription"><h2>Job Description</h2><p>Media relations, press releases and social content.</p></section>
+  <a class="button button--primary button--huge js-oneclick job-button" data-sr-track="apply" data-sr-track-position="bottom">I'm interested</a>
+  <a class="apply-with-smartr-button button button--smartr button--huge js-smartr-oneclick hidden button--primary job-button" data-sr-track="applyWithSmartr" data-sr-track-position="bottom"><span class="apply-with-smartr">I'm interested</span></a>
+</main>
+<aside><a class="button button--primary button--huge js-oneclick button--block" data-sr-track="apply" data-sr-track-position="aside" id="st-apply">I'm interested</a></aside>
+
+<div id="onetrust-banner-sdk" class="otFlat" role="region" aria-label="Cookie banner">
+  <div id="onetrust-policy-text">We use cookies to improve your experience. You can accept all cookies or reject non-essential ones.</div>
+  <div id="onetrust-button-group">
+    <button id="onetrust-pc-btn-handler">Cookies Settings</button>
+    <button id="onetrust-reject-all-handler">Reject All</button>
+    <button id="onetrust-accept-btn-handler">Accept All Cookies</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  function done(choice) {
+    document.getElementById('onetrust-banner-sdk').style.display = 'none';
+    window.__send('sr-cookies', { choice: choice });
+  }
+  document.getElementById('onetrust-reject-all-handler').addEventListener('click', function () { done('reject'); });
+  document.getElementById('onetrust-accept-btn-handler').addEventListener('click', function () { done('accept'); });
+  document.querySelectorAll('.js-oneclick').forEach(function (a) {
+    a.addEventListener('click', function () {
+      location.href = '/smartrecruiters/oneclick-ui/company/AcmeComms/publication/3f2c9a7e-1b2d-4c5e-8f90-0a1b2c3d4e5f' +
+        (location.search ? location.search + '&' : '?') + 'dcr_ci=AcmeComms';
+    });
+  });
+})();
+</script>
+</body>
+</html>

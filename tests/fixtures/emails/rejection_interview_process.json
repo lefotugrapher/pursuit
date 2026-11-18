@@ -1,0 +1,11 @@
+{
+  "expect": { "kind": "rejection", "company": "Brightwave Media" },
+  "email": {
+    "messageId": "<reject-1@brightwavemedia.example>",
+    "from": "Brightwave Media Talent <talent@brightwavemedia.com>",
+    "fromAddress": "talent@brightwavemedia.com",
+    "subject": "Your application for Content Executive",
+    "date": "2025-11-12T11:00:00.000Z",
+    "text": "Dear Kshitiz,\n\nThank you for your interest in the Content Executive role and for the time you gave to our interview process. We enjoyed meeting you at the first stage and the next stage was very competitive.\n\nUnfortunately, we have decided not to move forward with your application at this time. We will keep your CV on file for future roles.\n\nKind regards,\nBrightwave Media Talent Team"
+  }
+}

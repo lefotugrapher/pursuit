@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<!--
+  A company's own 3-step application form (no ATS), for the universal filler:
+  1 "Your details": name, email, phone with a separate "Country code" select, a City autocomplete
+    (pick a suggestion), CV upload → Next
+  2 "A few questions": right to work (radio), how did you hear (select), highest education (select),
+    "Which county do you live in?" (select: only answerable by mapping to the profile location),
+    "Why do you want to work at Acme Comms?" (textarea), optional earliest start date (date picker)
+    → Continue
+  3 "Review & submit": data-processing consent (required), job-alert opt-in (never ticked) → Submit
+    application → /thank-you page.
+  Variants (?variant=): extra (an extra required salary question), arkose (a bot challenge on step 3),
+  account (an "create an account to apply" wall instead of the form). Fictional company.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Apply: PR Executive | Acme Comms</title>
+<style>
+  body { font-family: sans-serif; margin: 24px; }
+  .row { margin: 10px 0; }
+  .ac { position: relative; }
+  .ac ul { list-style: none; margin: 0; padding: 0; border: 1px solid #999; }
+  .err { color: #b00; }
+</style>
+<script src="/_harness.js"></script>
+</head>
+<body>
+<header><form role="search" action="/search"><input type="search" name="q" placeholder="Search"><button type="submit">Search</button></form></header>
+<main id="main"></main>
+<script>
+(function () {
+  var variant = (/[?&]variant=([a-z]+)/.exec(location.search) || [])[1] || '';
+  var main = document.getElementById('main');
+  if (variant === 'account') {
+    main.innerHTML = '<h1>Create an account to apply</h1><form id="acct"><div class="row"><label for="a-email">Email</label><input id="a-email" type="email" name="email"></div>' +
+      '<div class="row"><label for="a-pw">Password</label><input id="a-pw" type="password" name="password"></div>' +
+      '<div class="row"><label for="a-pw2">Confirm password</label><input id="a-pw2" type="password" name="password2"></div>' +
+      '<button type="submit">Create account</button></form><p>Already have an account? <a href="#">Sign in</a></p>';
+    document.getElementById('acct').addEventListener('submit', function (e) { e.preventDefault(); window.__send('company-account', { created: true }); });
+    return;
+  }
+
+  var data = {};
+  var steps = [
+    '<form id="step1" novalidate><h2>Your details</h2>' +
+      '<div class="row"><label for="fn">First name *</label><input id="fn" name="first_name" required></div>' +
+      '<div class="row"><label for="ln">Surname *</label><input id="ln" name="surname" required></div>' +
+      '<div class="row"><label for="em">Email address *</label><input id="em" name="email_address" type="email" required></div>' +
+      '<fieldset class="row phone"><legend>Mobile number *</legend><select name="dial_code" aria-label="Country code"><option value="">Code</option>' +
+        '<option value="+44">+44 United Kingdom</option><option value="+353">+353 Ireland</option><option value="+1">+1 USA</option></select>' +
+        '<input name="mobile" type="tel" aria-label="Mobile number" required></fieldset>' +
+      '<div class="row"><label for="city">City *</label><div class="ac"><input id="city" name="city" role="combobox" aria-expanded="false" autocomplete="off" required><ul role="listbox" id="city-list" hidden></ul></div></div>' +
+      '<div class="row"><label for="cv">Upload your CV *</label><input id="cv" name="cv" type="file" required></div>' +
+      '<button type="button" id="next1">Next</button></form>',
+    '<form id="step2" novalidate><h2>A few questions</h2>' +
+      '<fieldset class="row"><legend>Do you have the right to work in Ireland? *</legend><label><input type="radio" name="rtw" value="yes" required> Yes</label> <label><input type="radio" name="rtw" value="no"> No</label></fieldset>' +
+      '<div class="row"><label for="src">How did you hear about this role? *</label><select id="src" name="source" required><option value="">Please select</option><option>Company website</option><option>LinkedIn</option><option>Recruitment agency</option><option>Other</option></select></div>' +
+      '<div class="row"><label for="edu">What is your highest level of education? *</label><select id="edu" name="education" required><option value="">Please select</option><option>Leaving Certificate</option><option>Level 7 Ordinary Degree</option><option>Level 8 Honours Bachelor\'s Degree</option><option>Master\'s Degree</option><option>PhD</option></select></div>' +
+      '<div class="row"><label for="county">Which county do you live in? *</label><select id="county" name="county" required><option value="">Please select</option><option>Dublin</option><option>Cork</option><option>Example</option><option>Louth</option><option>Outside Ireland</option></select></div>' +
+      (variant === 'extra' ? '<div class="row"><label for="sal">What are your salary expectations? *</label><input id="sal" name="salary" required></div>' : '') +
+      '<div class="row"><label for="why">Why do you want to work at Acme Comms? *</label><textarea id="why" name="why" required></textarea></div>' +
+      '<div class="row"><label for="start">Earliest start date</label><input id="start" name="start_date" placeholder="dd/mm/yyyy"></div>' +
+      '<button type="button" id="back2">Back</button> <button type="button" id="next2">Continue</button></form>',
+    '<form id="step3" novalidate><h2>Review &amp; submit</h2>' +
+      '<div class="row"><label><input type="checkbox" name="privacy" value="yes" required> I consent to Acme Comms processing my personal data for the purpose of this application, as described in the <a href="#">privacy notice</a>. *</label></div>' +
+      '<div class="row"><label><input type="checkbox" name="job_alerts" value="yes"> Email me job alerts and news about future opportunities at Acme Comms</label></div>' +
+      (variant === 'arkose' ? '<div class="row"><iframe id="arkoseFrame" title="Verification challenge" src="about:blank" width="400" height="300"></iframe></div>' : '') +
+      '<button type="submit" id="submit3">Submit application</button></form>',
+  ];
+
+  function required(form) {
+    var bad = [];
+    form.querySelectorAll('[required]').forEach(function (el) {
+      var ok = el.type === 'checkbox' ? el.checked
+        : el.type === 'radio' ? !!form.querySelector('input[name="' + el.name + '"]:checked')
+        : el.type === 'file' ? el.files.length > 0 : !!el.value.trim();
+      if (!ok && bad.indexOf(el.name) < 0) bad.push(el.name);
+    });
+    return bad;
+  }
+  function fail(form, bad) {
+    var p = form.querySelector('.err') || form.appendChild(Object.assign(document.createElement('p'), { className: 'err' }));
+    p.setAttribute('role', 'alert');
+    p.textContent = 'Please complete: ' + bad.join(', ');
+  }
+  function show(i) {
+    main.innerHTML = steps[i];
+    var form = main.querySelector('form');
+    if (i === 0) {
+      var city = form.querySelector('#city'), list = form.querySelector('#city-list');
+      city.addEventListener('input', function () {
+        var q = city.value.trim().toLowerCase();
+        list.innerHTML = '';
+        ['Exampletown, Co. Example, Ireland', 'Exampleville, Ontario, Canada', 'Dublin, Ireland'].forEach(function (p) {
+          if (q.length >= 2 && p.toLowerCase().indexOf(q) >= 0) {
+            var li = document.createElement('li'); li.setAttribute('role', 'option'); li.textContent = p;
+            li.addEventListener('click', function () { city.value = p; city.dataset.picked = '1'; city.setAttribute('data-selected', p); list.hidden = true; });
+            list.appendChild(li);
+          }
+        });
+        list.hidden = !list.children.length;
+      });
+      form.querySelector('#next1').addEventListener('click', function () {
+        var bad = required(form);
+        if (city.value && city.dataset.picked !== '1') bad.push('city');
+        if (bad.length) return fail(form, bad);
+        Object.assign(data, window.__collect(form));
+        show(1);
+      });
+    } else if (i === 1) {
+      form.querySelector('#back2').addEventListener('click', function () { show(0); });
+      form.querySelector('#next2').addEventListener('click', function () {
+        var bad = required(form);
+        if (bad.length) return fail(form, bad);
+        Object.assign(data, window.__collect(form));
+        show(2);
+      });
+    } else {
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var bad = required(form);
+        if (bad.length) return fail(form, bad);
+        Object.assign(data, window.__collect(form));
+        window.__send('company', data).then(function () { location.href = location.pathname.replace(/\/$/, '') + '/thank-you'; });
+      });
+    }
+  }
+  show(0);
+})();
+</script>
+</body>
+</html>

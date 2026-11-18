@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<!--
+  Fixture modelled on a live job-boards.greenhouse.io application page (Remix + react-select), Nov 2026:
+  label/input pairs with aria-required, phone fieldset with a "Country" combobox, visually-hidden file
+  inputs behind "Attach" buttons with "Enter manually" toggles, custom question_<id> comboboxes and
+  textareas, an EEOC "Voluntary Self-Identification" block, and a "Submit application" button that
+  leads to /confirmation. Company and questions are fictional.
+  ?noconfirm=1 → submit is accepted but no success state is ever shown.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Job Application for PR Executive at Acme Comms</title>
+<style>
+  body { font-family: sans-serif; margin: 24px; }
+  .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .field-wrapper { margin: 12px 0; }
+  .select__control { border: 1px solid #ccc; min-height: 34px; display: flex; align-items: center; padding: 2px 8px; cursor: default; }
+  .select__value-container { flex: 1; display: grid; }
+  .select__input { border: 0; outline: 0; width: 100%; }
+  .select-shell { position: relative; }
+  .select__menu { position: absolute; z-index: 10; background: #fff; border: 1px solid #999; width: 100%; max-height: 220px; overflow: auto; }
+  .select__option { padding: 6px 8px; }
+  .select__option:hover { background: #def; }
+  .helper-text--error { color: #b00; }
+  .file-upload__filename { margin-left: 8px; }
+  textarea { width: 100%; }
+</style>
+<script src="/_harness.js"></script>
+</head>
+<body>
+<main>
+<div class="job__header"><h1 class="section-header">PR Executive</h1><p>Acme Comms · Dublin, Ireland</p></div>
+<div class="job__description body"><p>Thank you for your interest in Acme Comms. We are looking for a PR Executive to join our Dublin team.</p></div>
+
+<div class="application--container">
+<div class="application--header"><h2 class="section-header">Apply for this job</h2><p><span class="required">*</span> indicates a required field</p></div>
+<form method="get" action="/greenhouse/acme/jobs/4012345" id="application-form" class="application--form" novalidate>
+  <div class="application--questions">
+    <div class="field-wrapper"><div class="text-input-wrapper"><div class="input-wrapper input-wrapper--outside-label">
+      <label id="first_name-label" for="first_name" class="label label--outside-label">First Name<span aria-hidden="true">*</span></label>
+      <input id="first_name" class="input input__single-line" aria-label="First Name" aria-invalid="false" aria-required="true" type="text" maxlength="255" autocomplete="given-name" value="">
+    </div></div></div>
+    <div class="field-wrapper"><div class="text-input-wrapper"><div class="input-wrapper input-wrapper--outside-label">
+      <label id="last_name-label" for="last_name" class="label label--outside-label">Last Name<span aria-hidden="true">*</span></label>
+      <input id="last_name" class="input input__single-line" aria-label="Last Name" aria-invalid="false" aria-required="true" type="text" maxlength="255" autocomplete="family-name" value="">
+    </div></div></div>
+    <div class="field-wrapper"><div class="text-input-wrapper"><div class="input-wrapper input-wrapper--outside-label">
+      <label id="email-label" for="email" class="label label--outside-label">Email<span aria-hidden="true">*</span></label>
+      <input id="email" class="input input__single-line" aria-label="Email" aria-invalid="false" aria-required="true" type="text" maxlength="255" autocomplete="email" value="">
+    </div></div></div>
+    <div><fieldset class="phone-input"><legend class="visually-hidden">Phone</legend>
+      <div class="phone-input__country"><div class="select" data-gh-select="country" data-label="Country" data-required="1"
+        data-options='["Ireland +353","United Kingdom +44","United States +1","India +91","Germany +49"]'></div></div>
+      <div class="phone-input__phone"><div class="text-input-wrapper"><div class="input-wrapper input-wrapper--outside-label">
+        <label id="phone-label" for="phone" class="label label--outside-label">Phone<span aria-hidden="true">*</span></label>
+        <input id="phone" class="input input__single-line" aria-label="Phone" aria-invalid="false" aria-required="true" type="tel" maxlength="255">
+      </div></div></div>
+    </fieldset></div>
+    <div class="field-wrapper"><div class="select" data-gh-select="candidate-location" data-label="Location (City)" data-required="0"
+      data-options='["Dublin, County Dublin, Ireland","Cork, County Cork, Ireland"]'></div>
+      <button type="button" class="btn--tertiary">Locate me</button></div>
+
+    <div class="field-wrapper"><div role="group" aria-labelledby="upload-label-resume" aria-required="true" class="file-upload">
+      <div id="upload-label-resume" class="label upload-label">Resume/CV<span class="required">*</span></div>
+      <div class="file-upload__wrapper"><div class="button-container">
+        <div class="secondary-button"><div><button type="button" class="btn btn--pill" data-attach="resume">Attach</button><label class="visually-hidden" for="resume">Attach</label><input id="resume" class="visually-hidden" type="file" accept=".pdf,.doc,.docx,.txt,.rtf"></div></div>
+        <div class="secondary-button"><button type="button" class="btn btn--pill" data-testid="resume-dropbox">Dropbox</button></div>
+        <div class="secondary-button"><button type="button" class="btn btn--pill">Google Drive</button></div>
+        <div class="secondary-button"><div><button type="button" class="btn btn--pill" data-testid="resume-text">Enter manually</button><label class="visually-hidden" for="resume_text">Enter manually</label></div></div>
+        <p class="file-upload__filetypes">Accepted file types: pdf, doc, docx, txt, rtf</p>
+      </div><span class="file-upload__filename"></span></div>
+    </div></div>
+    <div class="field-wrapper"><div role="group" aria-labelledby="upload-label-cover_letter" aria-required="false" class="file-upload">
+      <div id="upload-label-cover_letter" class="label upload-label">Cover Letter</div>
+      <div class="file-upload__wrapper"><div class="button-container">
+        <div class="secondary-button"><div><button type="button" class="btn btn--pill">Attach</button><label class="visually-hidden" for="cover_letter">Attach</label><input id="cover_letter" class="visually-hidden" type="file" accept=".pdf,.doc,.docx,.txt,.rtf"></div></div>
+        <div class="secondary-button"><button type="button" class="btn btn--pill" data-testid="cover_letter-dropbox">Dropbox</button></div>
+        <div class="secondary-button"><button type="button" class="btn btn--pill">Google Drive</button></div>
+        <div class="secondary-button"><div><button type="button" class="btn btn--pill" data-testid="cover_letter-text" id="cover-manual">Enter manually</button><label class="visually-hidden" for="cover_letter_text">Enter manually</label></div></div>
+        <p class="file-upload__filetypes">Accepted file types: pdf, doc, docx, txt, rtf</p>
+      </div><span class="file-upload__filename"></span></div>
+    </div></div>
+  </div>
+
+  <div class="application--questions"><hr>
+    <div class="field-wrapper"><div class="select" data-gh-select="question_1001"
+      data-label="Are you authorised to work in the country in which this role is located?" data-required="1"
+      data-options='["Yes","No"]'></div></div>
+    <div class="field-wrapper"><div class="text-input-wrapper"><div class="input-wrapper input-wrapper--outside-label">
+      <label id="question_1002-label" for="question_1002" class="label label--outside-label">Current or most recent company?<span aria-hidden="true">*</span></label>
+      <input id="question_1002" class="input input__single-line" aria-label="Current or most recent company?" aria-invalid="false" aria-required="true" type="text" maxlength="255" value="">
+    </div></div></div>
+    <div class="field-wrapper"><div class="text-input-wrapper"><div class="input-wrapper input-wrapper--outside-label">
+      <label id="question_1003-label" for="question_1003" class="label label--outside-label">LinkedIn Profile</label>
+      <input id="question_1003" class="input input__single-line" aria-label="LinkedIn Profile" aria-invalid="false" aria-required="false" type="text" maxlength="255" value="">
+    </div></div></div>
+    <div class="field-wrapper"><div class="text-input-wrapper"><div class="input-wrapper input-wrapper--outside-label">
+      <label id="question_1004-label" for="question_1004" class="label label--outside-label">Website</label>
+      <input id="question_1004" class="input input__single-line" aria-label="Website" aria-invalid="false" aria-required="false" type="text" maxlength="255" value="">
+    </div></div></div>
+    <div class="field-wrapper field-wrapper--multiline"><div class="text-input-wrapper"><div class="input-wrapper input-wrapper__multi-line input-wrapper--outside-label">
+      <label id="question_1005-label" for="question_1005" class="label label--outside-label">What excites you most about this opportunity?</label>
+      <textarea id="question_1005" class="input" aria-label="What excites you most about this opportunity?" aria-invalid="false" aria-required="false" rows="4"></textarea>
+    </div></div></div>
+    <div class="field-wrapper"><div class="select__container--native">
+      <label id="question_1006-label" for="question_1006" class="label label--outside-label">How did you hear about this job?<span aria-hidden="true">*</span></label>
+      <select id="question_1006" name="question_1006" aria-required="true">
+        <option value="">Please select</option>
+        <option value="1">Company website</option>
+        <option value="2">LinkedIn</option>
+        <option value="3">Referral</option>
+        <option value="4">Other</option>
+      </select>
+    </div></div>
+    <div class="field-wrapper"><div class="select" data-gh-select="question_1007" data-label="Please email me about future job openings" data-required="1"
+      data-options='["Yes","No"]'></div></div>
+    <div class="field-wrapper"><div class="checkbox__wrapper">
+      <input type="checkbox" id="question_1008" name="question_1008" value="1" aria-required="true">
+      <label id="question_1008-label" for="question_1008" class="label">I consent to Acme Comms processing my personal data for this application, as described in the privacy notice<span aria-hidden="true">*</span></label>
+    </div></div>
+  </div>
+
+  <div class="eeoc__container body"><div class="divider" role="separator"></div>
+    <div><h2 class="section-header font-primary">Voluntary Self-Identification</h2>
+      <p>For government reporting purposes, we ask candidates to respond to the below self-identification survey. Completion of the form is entirely voluntary.</p></div>
+    <div class="eeoc__question__wrapper"><div class="select" data-gh-select="gender" data-label="Gender" data-required="0"
+      data-options='["Male","Female","Decline To Self Identify"]'></div></div>
+    <div class="eeoc__question__wrapper"><div class="select" data-gh-select="hispanic_ethnicity" data-label="Are you Hispanic/Latino?" data-required="0"
+      data-options='["Yes","No","Decline To Self Identify"]'></div>
+      <a class="link" href="#">Race &amp; Ethnicity Definitions</a></div>
+    <div class="eeoc__question__wrapper"><div class="select" data-gh-select="veteran_status" data-label="Veteran Status" data-required="0"
+      data-options='["I am not a protected veteran","I identify as one or more of the classifications of protected veteran","I don&#39;t wish to answer"]'></div></div>
+    <div class="eeoc__question__wrapper"><div class="select__container--native">
+      <label id="disability_status-label" for="disability_status" class="label">Disability Status</label>
+      <select id="disability_status" name="disability_status">
+        <option value="">Select...</option>
+        <option value="1">Yes, I have a disability (or previously had a disability)</option>
+        <option value="2">No, I do not have a disability</option>
+        <option value="3">I do not want to answer</option>
+      </select>
+    </div></div>
+  </div>
+
+  <div class="application--submit"><button type="submit" class="btn btn--pill" aria-disabled="false">Submit application</button></div>
+</form>
+</div>
+</main>
+
+<script>
+(function () {
+  // Render each data-gh-select placeholder with job-boards.greenhouse.io's react-select markup.
+  document.querySelectorAll('[data-gh-select]').forEach(function (host) {
+    var id = host.getAttribute('data-gh-select');
+    var label = host.getAttribute('data-label');
+    var req = host.getAttribute('data-required') === '1';
+    host.innerHTML =
+      '<div class="select__container select__container--outside-label">' +
+        '<label id="' + id + '-label" for="' + id + '" class="label select__label select__label--outside-label"></label>' +
+        '<div class="select-shell">' +
+          '<span id="react-select-' + id + '-live-region" class="a11y"></span>' +
+          '<div><div class="select__control--outside-label select__control">' +
+            '<div class="select__value-container">' +
+              '<div class="select__placeholder" id="react-select-' + id + '-placeholder">Select...</div>' +
+              '<div class="select__input-container" data-value="">' +
+                '<input class="select__input" autocapitalize="none" autocomplete="off" autocorrect="off" id="' + id + '" spellcheck="false" tabindex="0" type="text" aria-autocomplete="list" aria-expanded="false" aria-haspopup="true" aria-invalid="false" aria-labelledby="' + id + '-label" aria-required="' + req + '" role="combobox" aria-describedby="react-select-' + id + '-placeholder" value="">' +
+              '</div>' +
+            '</div>' +
+            '<div class="select__indicators"><button type="button" class="icon-button icon-button--sm" aria-label="Toggle flyout" tabindex="-1">v</button></div>' +
+          '</div></div>' +
+          (req ? '<input required tabindex="-1" aria-hidden="true" style="opacity:0;position:absolute;pointer-events:none" value="">' : '') +
+        '</div>' +
+      '</div>';
+    var lab = host.querySelector('label');
+    lab.textContent = label;
+    if (req) { var star = document.createElement('span'); star.setAttribute('aria-hidden', 'true'); star.textContent = '*'; lab.appendChild(star); }
+    window.__reactSelect(host.querySelector('.select__container'), JSON.parse(host.getAttribute('data-options')));
+  });
+
+  // Attach → show the chosen file name, as Greenhouse does.
+  document.querySelectorAll('.file-upload input[type="file"]').forEach(function (input) {
+    input.addEventListener('change', function () {
+      var box = input.closest('.file-upload').querySelector('.file-upload__filename');
+      box.textContent = input.files.length ? input.files[0].name : '';
+    });
+  });
+
+  // Cover letter "Enter manually" → textarea.
+  document.getElementById('cover-manual').addEventListener('click', function () {
+    var wrap = this.closest('.file-upload');
+    if (wrap.querySelector('#cover_letter_text')) return;
+    var ta = document.createElement('textarea');
+    ta.id = 'cover_letter_text';
+    ta.name = 'cover_letter_text';
+    ta.setAttribute('aria-label', 'Cover Letter');
+    ta.rows = 8;
+    wrap.appendChild(ta);
+  });
+
+  function clearErrors() { document.querySelectorAll('.helper-text--error').forEach(function (e) { e.remove(); }); }
+  function addError(el, msg) {
+    var p = document.createElement('p');
+    p.className = 'helper-text helper-text--error';
+    p.id = (el.id || 'field') + '-error';
+    p.textContent = msg;
+    (el.closest('.field-wrapper, .phone-input__country, .phone-input__phone') || el.parentElement).appendChild(p);
+  }
+
+  var form = document.getElementById('application-form');
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    clearErrors();
+    var bad = 0;
+    form.querySelectorAll('[aria-required="true"]').forEach(function (el) {
+      var ok;
+      if (el.getAttribute('role') === 'combobox') ok = !!el.getAttribute('data-selected');
+      else if (el.getAttribute('role') === 'group') { var f = el.querySelector('input[type="file"]'); ok = f && f.files.length > 0; }
+      else if (el.type === 'checkbox') ok = el.checked;
+      else ok = (el.value || '').trim().length > 0;
+      if (!ok) { bad++; addError(el, 'This field is required.'); }
+    });
+    if (bad) return;
+    var data = window.__collect(form);
+    window.__send('greenhouse', data).then(function () {
+      if (/noconfirm=1/.test(location.search)) return;
+      location.href = location.pathname.replace(/\/$/, '') + '/confirmation';
+    });
+  });
+})();
+</script>
+</body>
+</html>

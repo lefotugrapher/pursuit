@@ -1,0 +1,97 @@
+{
+ "_note": "Trimmed real response from apply.workable.com/api/v1/widget/accounts/thepeoplegroup?details=true (2026-11-15). Third job is a real entry with title/location/description edited to cover the Ireland marketing path.",
+ "name": "The People Group",
+ "description": null,
+ "jobs": [
+  {
+   "title": "Freelance - AI Specialist with Lead Sourcing Automation Experience - Remote",
+   "shortcode": "A0F681076F",
+   "code": "",
+   "employment_type": "Contract",
+   "telecommuting": true,
+   "department": "Leverage Assistants Contractors",
+   "url": "https://apply.workable.com/j/A0F681076F",
+   "shortlink": "https://apply.workable.com/j/A0F681076F",
+   "application_url": "https://apply.workable.com/j/A0F681076F/apply",
+   "published_on": "2026-11-12",
+   "created_at": "2026-10-26",
+   "country": "Philippines",
+   "city": "",
+   "state": "",
+   "education": null,
+   "experience": "Mid-Senior level",
+   "function": "Information Technology",
+   "industry": "Outsourcing/Offshoring",
+   "locations": [
+    {
+     "country": "Philippines",
+     "countryCode": "PH",
+     "city": "",
+     "region": null,
+     "hidden": false
+    }
+   ],
+   "description": "<p>The People Group is excited to announce an opening for an AI Support Specialist. This role is pivotal in helping our clients navigate the evolving landscape of artificial intelligence and ensuring they get the most value from their AI initiatives. As an AI Support Specialist, you will be responsible for providing expert guidance, technical support and training related to AI technologies and applications.</p>"
+  },
+  {
+   "title": "Freelance - M&A Deal Sourcing & AI Automation Specialist - Remote",
+   "shortcode": "1E7DAFD20D",
+   "code": "",
+   "employment_type": "Contract",
+   "telecommuting": true,
+   "department": "Leverage Assistants Contractors",
+   "url": "https://apply.workable.com/j/1E7DAFD20D",
+   "shortlink": "https://apply.workable.com/j/1E7DAFD20D",
+   "application_url": "https://apply.workable.com/j/1E7DAFD20D/apply",
+   "published_on": "2026-11-12",
+   "created_at": "2026-10-14",
+   "country": "Philippines",
+   "city": "",
+   "state": "",
+   "education": null,
+   "experience": "Mid-Senior level",
+   "function": "Business Development",
+   "industry": "Outsourcing/Offshoring",
+   "locations": [
+    {
+     "country": "Philippines",
+     "countryCode": "PH",
+     "city": "",
+     "region": null,
+     "hidden": false
+    }
+   ],
+   "description": "<p>We are looking for a proactive, detail oriented and tech savvy professional to support an M&amp;A business through a combination of Executive Assistant support, research, deal sourcing, lead generation and AI powered automation. This role combines traditional executive and administrative support with analytical and technical responsibilities to help streamline operations, identify potential acquisition opportunities and improve deal sourcing workflows.</p>"
+  },
+  {
+   "title": "Marketing & Communications Executive",
+   "shortcode": "B7C2D19E44",
+   "code": "",
+   "employment_type": "Full-time",
+   "telecommuting": false,
+   "department": "Marketing",
+   "url": "https://apply.workable.com/j/B7C2D19E44",
+   "shortlink": "https://apply.workable.com/j/B7C2D19E44",
+   "application_url": "https://apply.workable.com/j/B7C2D19E44/apply",
+   "published_on": "2026-11-12",
+   "created_at": "2026-10-26",
+   "country": "Ireland",
+   "city": "Dublin",
+   "state": "County Dublin",
+   "education": null,
+   "experience": "Entry level",
+   "function": "Marketing",
+   "industry": "Outsourcing/Offshoring",
+   "locations": [
+    {
+     "country": "Ireland",
+     "countryCode": "IE",
+     "city": "Dublin",
+     "region": "County Dublin",
+     "hidden": false
+    }
+   ],
+   "description": "<p>We are hiring a <strong>Marketing &amp; Communications Executive</strong> in Dublin.</p><ul><li>Write press releases</li><li>Run our social channels</li></ul><p>Salary: €35,000 - €40,000 per annum.</p>"
+  }
+ ]
+}

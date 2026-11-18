@@ -1,0 +1,11 @@
+{
+  "expect": { "kind": "question", "company": "Northlight Agency" },
+  "email": {
+    "messageId": "<question-1@northlight.example>",
+    "from": "Mark Doyle <mark.doyle@northlightagency.ie>",
+    "fromAddress": "mark.doyle@northlightagency.ie",
+    "subject": "Social Media Executive role",
+    "date": "2025-11-12T12:00:00.000Z",
+    "text": "Hi Kshitiz,\n\nThanks for your application. Before we go further, could you please confirm your notice period and your salary expectations for this role?\n\nThanks,\nMark"
+  }
+}

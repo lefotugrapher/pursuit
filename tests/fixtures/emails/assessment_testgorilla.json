@@ -1,0 +1,11 @@
+{
+  "expect": { "kind": "assessment", "company": "Cairn Foods" },
+  "email": {
+    "messageId": "<assess-1@cairnfoods.example>",
+    "from": "Cairn Foods Careers <careers@cairnfoods.ie>",
+    "fromAddress": "careers@cairnfoods.ie",
+    "subject": "Next step: online assessment",
+    "date": "2025-11-12T13:00:00.000Z",
+    "text": "Hi Kshitiz,\n\nThanks for your application for the Marketing Assistant role. As a next step we'd ask you to complete a short TestGorilla assessment within 5 days using the link below.\n\nhttps://app.testgorilla.com/invite/abc123\n\nBest of luck,\nCairn Foods Talent"
+  }
+}

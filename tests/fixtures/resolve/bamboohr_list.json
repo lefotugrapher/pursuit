@@ -1,0 +1,8 @@
+{
+ "_note": "Structural fixture following the public BambooHR careers/list schema (no live account with open roles was reachable on 2026-11-16; empty real response is bamboohr_empty.json).",
+ "meta": { "totalCount": 2 },
+ "result": [
+  { "id": "41", "jobOpeningName": "Content Marketing Executive", "departmentId": "18412", "departmentLabel": "Marketing", "employmentStatusLabel": "Full-Time", "location": { "city": "Dublin", "state": null }, "atsLocation": { "country": "Ireland", "state": null, "province": null, "city": "Dublin" }, "isRemote": null, "locationType": "0" },
+  { "id": "42", "jobOpeningName": "Account Executive", "departmentId": "18413", "departmentLabel": "Sales", "employmentStatusLabel": "Full-Time", "location": { "city": "Austin", "state": "Texas" }, "atsLocation": { "country": "United States", "state": "Texas", "province": null, "city": "Austin" }, "isRemote": null, "locationType": "0" }
+ ]
+}

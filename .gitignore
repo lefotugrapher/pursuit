@@ -1,0 +1,24 @@
+node_modules/
+.next/
+data/
+.env.local
+.env*.local
+config/profile.json
+config/facts.json
+config/answers.json
+config/sources.json
+*.tsbuildinfo
+next-env.d.ts
+.DS_Store
+config/coach-context.md
+config/cv/
+.pack/
+*.pack.enc
+deploy/searxng/settings.yml
+
+# Real config is personal (AGENTS.md rule 5); only *.example.json templates are shared.
+config/sponsors.json
+config/*.backup.json
+.probe-tmp.mjs
+.pursuit-*
+*.log

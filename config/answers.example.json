@@ -1,0 +1,79 @@
+{
+  "entries": [
+    {
+      "id": "right-to-work-ireland",
+      "patterns": ["right to work in ireland", "authorised to work in ireland", "eligible to work in ireland"],
+      "answer": "",
+      "type": "yesno",
+      "confirm": true,
+      "notes": "Example: leave blank until you confirm. Blank answers always go to you."
+    },
+    {
+      "id": "sponsorship-future",
+      "patterns": ["require sponsorship in the future", "future sponsorship"],
+      "answer": "",
+      "type": "yesno",
+      "confirm": true,
+      "notes": "Example placeholder."
+    },
+    {
+      "id": "salary-expectation",
+      "patterns": ["salary expectation", "expected salary", "desired salary"],
+      "answer": "In line with the market rate for the role",
+      "type": "text",
+      "confirm": true,
+      "notes": "Numeric salary fields are always handed to you."
+    },
+    {
+      "id": "heard-about",
+      "patterns": ["how did you hear", "where did you hear"],
+      "answer": "Company careers page",
+      "type": "select",
+      "confirm": false
+    },
+    {
+      "id": "linkedin-url",
+      "patterns": ["linkedin profile", "linkedin url", "linkedin"],
+      "answer": "https://www.linkedin.com/in/jane-doe-example",
+      "type": "url",
+      "confirm": false
+    },
+    {
+      "id": "portfolio-url",
+      "patterns": ["portfolio", "personal website", "website"],
+      "answer": "https://portfolio.example.com",
+      "type": "url",
+      "confirm": false
+    },
+    {
+      "id": "highest-education",
+      "patterns": ["highest level of education", "highest qualification", "education level"],
+      "answer": "Bachelor's Degree",
+      "type": "select",
+      "confirm": false
+    },
+    {
+      "id": "age-18",
+      "patterns": ["over 18", "at least 18", "18 or older"],
+      "answer": "Yes",
+      "type": "yesno",
+      "confirm": false
+    },
+    {
+      "id": "eeo-gender",
+      "patterns": ["gender", "gender identity"],
+      "answer": "Prefer not to say",
+      "type": "select",
+      "confirm": false,
+      "notes": "Choose the form's own decline option. If there isn't one, hand off."
+    },
+    {
+      "id": "legal-attestation",
+      "patterns": ["i certify", "i agree", "privacy policy", "attest"],
+      "answer": "",
+      "type": "yesno",
+      "confirm": true,
+      "notes": "Legal attestations are always handed to you."
+    }
+  ]
+}

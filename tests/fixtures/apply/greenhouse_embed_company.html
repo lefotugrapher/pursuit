@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<!--
+  A big employer's own careers page for a Greenhouse job (the pattern behind Greenhouse absolute_url
+  values such as stripe.com/jobs/search?gh_jid=…): no application form in the page itself, only
+  Greenhouse's embed (div#grnhse_app > iframe#grnhse_iframe pointing at the embed job_app form).
+  ?noembed=1 → the page has neither a form nor the iframe (the runner must use the board ids).
+-->
+<html lang="en">
+<head><meta charset="utf-8"><title>PR Executive | Careers at Acme Comms</title></head>
+<body>
+<header><form role="search" action="/search"><input type="search" name="q" placeholder="Search jobs"><button type="submit">Search</button></form></header>
+<main>
+  <h1>PR Executive</h1>
+  <p>Dublin · Communications</p>
+  <div id="grnhse_app"></div>
+</main>
+<script>
+  if (!/noembed=1/.test(location.search)) {
+    var f = document.createElement('iframe');
+    f.id = 'grnhse_iframe';
+    f.width = '100%';
+    f.height = '1200';
+    f.src = '/greenhouse/embed/job_app?for=acme&token=4012345';
+    document.getElementById('grnhse_app').appendChild(f);
+  }
+</script>
+</body>
+</html>

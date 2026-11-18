@@ -1,0 +1,11 @@
+{
+  "expect": { "kind": "offer", "company": "Acme Comms" },
+  "email": {
+    "messageId": "<offer-1@acmecomms.example>",
+    "from": "Acme Comms HR <hr@acmecomms.ie>",
+    "fromAddress": "hr@acmecomms.ie",
+    "subject": "Offer of employment: PR Executive",
+    "date": "2025-11-20T10:00:00.000Z",
+    "text": "Dear Kshitiz,\n\nFollowing your interview, we are delighted to offer you the position of PR Executive at Acme Comms. Your offer letter is attached; please review it and let us know if you have any questions.\n\nWarm regards,\nAcme Comms HR"
+  }
+}

@@ -1,0 +1,39 @@
+{
+ "_note": "Trimmed real response from GET https://wd5.myworkdaysite.com/wday/cxs/microchiphr/External/job/Ireland---Dublin-MCHP/Centralized-Marketing-Specialist_R4258-26 (2026-11-16).",
+ "jobPostingInfo": {
+  "id": "74a6ea8c357c1001db8b6ef511470000",
+  "title": "Centralized Marketing Specialist",
+  "location": "Ireland - Dublin (MCHP)",
+  "additionalLocations": [
+   "Ireland - Ennis"
+  ],
+  "postedOn": "Posted 24 Days Ago",
+  "startDate": "2026-10-23",
+  "timeType": "Full time",
+  "jobReqId": "R4258-26",
+  "jobPostingId": "Centralized-Marketing-Specialist_R4258-26",
+  "jobPostingSiteId": "External",
+  "country": {
+   "descriptor": "Ireland",
+   "id": "04a05835925f45b3a59406a2a6b72c8a"
+  },
+  "canApply": true,
+  "posted": true,
+  "includeResumeParsing": true,
+  "jobRequisitionLocation": {
+   "descriptor": "Ireland - Ennis",
+   "country": {
+    "descriptor": "Ireland",
+    "id": "04a05835925f45b3a59406a2a6b72c8a",
+    "alpha2Code": "IE"
+   }
+  },
+  "externalUrl": "https://wd5.myworkdaysite.com/recruiting/microchiphr/External/job/Ireland---Dublin-MCHP/Centralized-Marketing-Specialist_R4258-26",
+  "questionnaireId": "1c4508016b801001fcb0156383830000",
+  "jobDescription": "<p>Are you looking for a unique opportunity to be a part of something great? Want to join a 17,000-member team that works on the technology that powers the world around us? Looking for an atmosphere of trust, empowerment, respect, diversity, and communication? How about an opportunity to own a piece of a multi-billion dollar (with a B!) global organization? We offer all that and more at Microchip Technology Inc.</p><p></p><p>People come to work at Microchip because we help design the technology that runs the world. They stay because our culture supports their growth and stability. They are cha"
+ },
+ "hiringOrganization": {
+  "name": "Microchip - International",
+  "url": ""
+ }
+}

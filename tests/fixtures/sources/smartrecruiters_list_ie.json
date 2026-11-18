@@ -1,0 +1,277 @@
+{
+ "offset": 0,
+ "limit": 100,
+ "totalFound": 3,
+ "content": [
+  {
+   "id": "744000161546569",
+   "name": "RETAIL ASSISTANT",
+   "uuid": "a4a02a88-7c7a-41e5-a8d1-19590022f7fa",
+   "jobAdId": "ae711e4a-9a10-44f4-9a1f-5e2434cf1b60",
+   "defaultJobAd": true,
+   "refNumber": "JR-16611",
+   "company": {
+    "identifier": "Primark",
+    "name": "Primark"
+   },
+   "releasedDate": "2026-11-13T17:37:46.197Z",
+   "location": {
+    "city": "Carlow",
+    "region": "CARLOW",
+    "country": "ie",
+    "address": "Unit 21 Carlow Shopping Centre O'Kennedy Avenue",
+    "remote": false,
+    "hybrid": false,
+    "fullLocation": "Carlow, CARLOW, Ireland"
+   },
+   "industry": {
+    "id": "retail",
+    "label": "Retail"
+   },
+   "department": {},
+   "function": {
+    "id": "other",
+    "label": "Other"
+   },
+   "typeOfEmployment": {
+    "id": "part-time",
+    "label": "Part-time"
+   },
+   "experienceLevel": {
+    "id": "entry_level",
+    "label": "Entry Level"
+   },
+   "customField": [
+    {
+     "fieldId": "6874b79198f98110761a7e54",
+     "fieldLabel": "Recruitment Type",
+     "valueId": "retailAssistant",
+     "valueLabel": "Retail Assistants"
+    },
+    {
+     "fieldId": "6874bb1ecb7046bf41466685",
+     "fieldLabel": "Worker Sub Type",
+     "valueId": "6fbd97e8abb31079e5247add267e19bf",
+     "valueLabel": "Fixed Term (Fixed Term)"
+    },
+    {
+     "fieldId": "6798e178b1b228180779ccc6",
+     "fieldLabel": "Brands",
+     "valueId": "default",
+     "valueLabel": "Primark"
+    },
+    {
+     "fieldId": "6874bc68cb7046bf41466686",
+     "fieldLabel": "Time Type",
+     "valueId": "23f774cf9482107766a666c75f1e1873",
+     "valueLabel": "Part time"
+    },
+    {
+     "fieldId": "6874cca3345d4803afba7d65",
+     "fieldLabel": "Primary Location",
+     "valueId": "6fbd97e8abb3107a3f5883cba16e7810",
+     "valueLabel": "002 Carlow"
+    },
+    {
+     "fieldId": "COUNTRY",
+     "fieldLabel": "Country/Region",
+     "valueId": "ie",
+     "valueLabel": "Ireland"
+    },
+    {
+     "fieldId": "6874d05c2670f20eeed88402",
+     "fieldLabel": "Primark Function",
+     "valueId": "eb21bd6f-dfd0-44a7-8bea-9506f53d47a6",
+     "valueLabel": "Retail Assistant"
+    }
+   ],
+   "visibility": "PUBLIC",
+   "ref": "https://api.smartrecruiters.com/v1/companies/Primark/postings/744000161546569",
+   "language": {
+    "code": "en-GB",
+    "label": "English (UK)",
+    "labelNative": "English (UK)"
+   }
+  },
+  {
+   "id": "744000161307653",
+   "name": "RETAIL ASSISTANT",
+   "uuid": "138aad66-c2cd-4d6c-8411-bc3bf5bbbfe8",
+   "jobAdId": "5b6c0464-152a-4280-90ba-524af7056990",
+   "defaultJobAd": true,
+   "refNumber": "JR-16488",
+   "company": {
+    "identifier": "Primark",
+    "name": "Primark"
+   },
+   "releasedDate": "2026-11-12T14:07:26.491Z",
+   "location": {
+    "city": "Clonmel",
+    "region": "Tipperary",
+    "country": "ie",
+    "address": "O'Connell Street",
+    "remote": false,
+    "hybrid": false,
+    "fullLocation": "Clonmel, Tipperary, Ireland"
+   },
+   "industry": {
+    "id": "retail",
+    "label": "Retail"
+   },
+   "department": {},
+   "function": {
+    "id": "other",
+    "label": "Other"
+   },
+   "typeOfEmployment": {
+    "id": "part-time",
+    "label": "Part-time"
+   },
+   "experienceLevel": {
+    "id": "entry_level",
+    "label": "Entry Level"
+   },
+   "customField": [
+    {
+     "fieldId": "6874b79198f98110761a7e54",
+     "fieldLabel": "Recruitment Type",
+     "valueId": "retailAssistant",
+     "valueLabel": "Retail Assistants"
+    },
+    {
+     "fieldId": "6874bb1ecb7046bf41466685",
+     "fieldLabel": "Worker Sub Type",
+     "valueId": "6fbd97e8abb31079e5247add267e19bf",
+     "valueLabel": "Fixed Term (Fixed Term)"
+    },
+    {
+     "fieldId": "6798e178b1b228180779ccc6",
+     "fieldLabel": "Brands",
+     "valueId": "default",
+     "valueLabel": "Primark"
+    },
+    {
+     "fieldId": "6874bc68cb7046bf41466686",
+     "fieldLabel": "Time Type",
+     "valueId": "23f774cf9482107766a666c75f1e1873",
+     "valueLabel": "Part time"
+    },
+    {
+     "fieldId": "6874cca3345d4803afba7d65",
+     "fieldLabel": "Primary Location",
+     "valueId": "6fbd97e8abb3107a3f54458a60a674a4",
+     "valueLabel": "038 Clonmel"
+    },
+    {
+     "fieldId": "COUNTRY",
+     "fieldLabel": "Country/Region",
+     "valueId": "ie",
+     "valueLabel": "Ireland"
+    },
+    {
+     "fieldId": "6874d05c2670f20eeed88402",
+     "fieldLabel": "Primark Function",
+     "valueId": "eb21bd6f-dfd0-44a7-8bea-9506f53d47a6",
+     "valueLabel": "Retail Assistant"
+    }
+   ],
+   "visibility": "PUBLIC",
+   "ref": "https://api.smartrecruiters.com/v1/companies/Primark/postings/744000161307653",
+   "language": {
+    "code": "en-GB",
+    "label": "English (UK)",
+    "labelNative": "English (UK)"
+   }
+  },
+  {
+   "id": "744000160890019",
+   "name": "VM Communications Coordinator & Stylist",
+   "uuid": "2b639f53-868e-4a46-ac0c-b40af760c427",
+   "jobAdId": "b1680c75-3b76-4750-a02f-fbfbcdc0ac1c",
+   "defaultJobAd": true,
+   "refNumber": "JR-16453",
+   "company": {
+    "identifier": "Primark",
+    "name": "Primark"
+   },
+   "releasedDate": "2026-11-10T14:26:38.739Z",
+   "location": {
+    "city": "Dublin",
+    "country": "ie",
+    "address": "Arthur Ryan House, 22–24 Parnell Street",
+    "postalCode": "D01 NX45",
+    "remote": false,
+    "hybrid": true,
+    "fullLocation": "Dublin, , Ireland"
+   },
+   "industry": {
+    "id": "retail",
+    "label": "Retail"
+   },
+   "department": {},
+   "function": {
+    "id": "other",
+    "label": "Other"
+   },
+   "typeOfEmployment": {
+    "id": "permanent",
+    "label": "Full-time"
+   },
+   "experienceLevel": {
+    "id": "associate",
+    "label": "Associate"
+   },
+   "customField": [
+    {
+     "fieldId": "6874b79198f98110761a7e54",
+     "fieldLabel": "Recruitment Type",
+     "valueId": "centralFunction",
+     "valueLabel": "Central Functions"
+    },
+    {
+     "fieldId": "6874bb1ecb7046bf41466685",
+     "fieldLabel": "Worker Sub Type",
+     "valueId": "6fbd97e8abb31079e5246f45dd7e19bc",
+     "valueLabel": "Permanent"
+    },
+    {
+     "fieldId": "6798e178b1b228180779ccc6",
+     "fieldLabel": "Brands",
+     "valueId": "default",
+     "valueLabel": "Primark"
+    },
+    {
+     "fieldId": "6874bc68cb7046bf41466686",
+     "fieldLabel": "Time Type",
+     "valueId": "23f774cf9482107766a666c933de1874",
+     "valueLabel": "Full time"
+    },
+    {
+     "fieldId": "6874cca3345d4803afba7d65",
+     "fieldLabel": "Primary Location",
+     "valueId": "6fbd97e8abb3107a3f5920f8a91e78d8",
+     "valueLabel": "999 Central Office Dublin"
+    },
+    {
+     "fieldId": "COUNTRY",
+     "fieldLabel": "Country/Region",
+     "valueId": "ie",
+     "valueLabel": "Ireland"
+    },
+    {
+     "fieldId": "6874d05c2670f20eeed88402",
+     "fieldLabel": "Primark Function",
+     "valueId": "65a884d4-7d2f-4c59-aff1-577e24064da6",
+     "valueLabel": "Marketing & Brand"
+    }
+   ],
+   "visibility": "PUBLIC",
+   "ref": "https://api.smartrecruiters.com/v1/companies/Primark/postings/744000160890019",
+   "language": {
+    "code": "en",
+    "label": "English",
+    "labelNative": "English (US)"
+   }
+  }
+ ]
+}

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<!--
+  SmartRecruiters application app (jobs.smartrecruiters.com/oneclick-ui/company/{Company}/publication/{uuid}).
+  The live app sits behind DataDome (an automated GET returns "Please enable JS and disable any ad
+  blocker" + a captcha-delivery.com iframe), so its DOM is MODELLED, not copied: an Angular-style app
+  of web components with OPEN SHADOW ROOTS (labels and inputs inside each component), a 2-step flow
+  (personal information + resume + "Message to the Hiring Team" → Next → screening questions +
+  privacy-policy consent + optional talent-community opt-in → Submit), resume parsing that pre-fills
+  the first name, a city autocomplete, a phone field with a separate country-code select, and a
+  thank-you screen. Variants (?variant=): datadome (bot wall), account (sign-in wall), extra (an
+  extra required salary question nobody may invent an answer for).
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Apply: PR Executive | Acme Comms</title>
+<style>
+  body { font-family: sans-serif; margin: 24px; }
+  .step { max-width: 640px; }
+  .footer { margin-top: 20px; }
+  .err { color: #b00; }
+</style>
+<script src="/_harness.js"></script>
+</head>
+<body>
+<div id="app"><p>Loading…</p></div>
+
+<script>
+(function () {
+  var variant = (/[?&]variant=([a-z]+)/.exec(location.search) || [])[1] || '';
+  var app = document.getElementById('app');
+
+  if (variant === 'datadome') {
+    document.title = 'jobs.smartrecruiters.com';
+    document.body.innerHTML = '<p id="cmsg">Please enable JS and disable any ad blocker</p>' +
+      '<iframe title="DataDome CAPTCHA" src="about:blank" width="400" height="500" style="border:1px solid #ccc"></iframe>';
+    return;
+  }
+  if (variant === 'account') {
+    app.innerHTML = '<h1>Sign in to apply</h1><p>Sign in with your SmartRecruiters account or create an account to continue.</p>' +
+      '<form id="login"><label>Email <input type="email" name="loginEmail"></label> <label>Password <input type="password" name="loginPassword"></label>' +
+      ' <button type="submit">Sign in</button></form><p><a href="#">Create an account</a></p>';
+    document.getElementById('login').addEventListener('submit', function (e) { e.preventDefault(); window.__send('sr-login', { typed: true }); });
+    return;
+  }
+
+  function define(name, render) {
+    customElements.define(name, class extends HTMLElement {
+      connectedCallback() {
+        if (this.shadowRoot) return;
+        var root = this.attachShadow({ mode: 'open' });
+        render(this, root);
+      }
+    });
+  }
+  function star(host) { return host.hasAttribute('required') ? ' *' : ''; }
+
+  define('spl-input', function (host, root) {
+    root.innerHTML = '<div class="field"><label for="in"></label><input id="in"><div class="err" role="alert"></div></div>';
+    root.querySelector('label').textContent = host.getAttribute('label') + star(host);
+    var input = root.querySelector('input');
+    input.name = host.getAttribute('name');
+    input.type = host.getAttribute('type') || 'text';
+    if (host.getAttribute('autocomplete')) input.setAttribute('autocomplete', host.getAttribute('autocomplete'));
+    if (host.hasAttribute('required')) input.required = true;
+  });
+  define('spl-textarea', function (host, root) {
+    root.innerHTML = '<div class="field"><label for="in"></label><textarea id="in" rows="5"></textarea></div>';
+    root.querySelector('label').textContent = host.getAttribute('label') + star(host);
+    root.querySelector('textarea').name = host.getAttribute('name');
+  });
+  define('spl-select', function (host, root) {
+    root.innerHTML = '<div class="field"><label for="in"></label><select id="in"><option value="">Select</option></select></div>';
+    root.querySelector('label').textContent = host.getAttribute('label') + star(host);
+    var sel = root.querySelector('select');
+    sel.name = host.getAttribute('name');
+    if (host.hasAttribute('required')) sel.required = true;
+    JSON.parse(host.getAttribute('options')).forEach(function (o) { var op = document.createElement('option'); op.textContent = o; op.value = o; sel.appendChild(op); });
+  });
+  define('spl-radio-group', function (host, root) {
+    root.innerHTML = '<fieldset class="field"><legend></legend></fieldset>';
+    root.querySelector('legend').textContent = host.getAttribute('label') + star(host);
+    var fs = root.querySelector('fieldset');
+    JSON.parse(host.getAttribute('options')).forEach(function (o) {
+      var l = document.createElement('label');
+      var r = document.createElement('input');
+      r.type = 'radio'; r.name = host.getAttribute('name'); r.value = o;
+      if (host.hasAttribute('required')) r.required = true;
+      l.appendChild(r); l.appendChild(document.createTextNode(' ' + o));
+      fs.appendChild(l);
+    });
+  });
+  define('spl-checkbox', function (host, root) {
+    root.innerHTML = '<div class="field"><label><input type="checkbox" value="accepted"><span></span></label></div>';
+    var box = root.querySelector('input');
+    box.name = host.getAttribute('name');
+    if (host.hasAttribute('required')) box.required = true;
+    root.querySelector('span').textContent = host.getAttribute('label') + star(host);
+  });
+  define('spl-autocomplete', function (host, root) {
+    var places = ['Exampletown, Co. Example, Ireland', 'Exampleton, Ohio, United States', 'Dublin, Co. Dublin, Ireland'];
+    root.innerHTML = '<div class="field"><label for="in"></label><div class="ac"><input id="in" role="combobox" aria-autocomplete="list" aria-expanded="false" autocomplete="off"><ul role="listbox" hidden></ul></div></div>';
+    root.querySelector('label').textContent = host.getAttribute('label') + star(host);
+    var input = root.querySelector('input');
+    var list = root.querySelector('ul');
+    input.name = host.getAttribute('name');
+    if (host.hasAttribute('required')) input.required = true;
+    input.addEventListener('input', function () {
+      var q = input.value.trim().toLowerCase();
+      list.innerHTML = '';
+      if (q.length < 2) { list.hidden = true; return; }
+      places.filter(function (p) { return p.toLowerCase().indexOf(q) >= 0; }).forEach(function (p) {
+        var li = document.createElement('li');
+        li.setAttribute('role', 'option');
+        li.textContent = p;
+        li.addEventListener('click', function () { input.value = p; input.setAttribute('data-picked', '1'); list.hidden = true; });
+        list.appendChild(li);
+      });
+      list.hidden = !list.children.length;
+      input.setAttribute('aria-expanded', String(!list.hidden));
+    });
+  });
+  define('spl-phone-field', function (host, root) {
+    root.innerHTML = '<div class="phone-field" role="group" aria-label="Phone number"><span class="lbl">Phone number *</span>' +
+      '<select name="phoneCountryCode" aria-label="Country code"><option value="">Code</option><option value="+44">United Kingdom (+44)</option>' +
+      '<option value="+353">Ireland (+353)</option><option value="+1">United States (+1)</option></select>' +
+      '<input type="tel" name="phoneNumber" aria-label="Phone number" required></div>';
+  });
+  define('spl-dropzone', function (host, root) {
+    root.innerHTML = '<div class="dropzone"><span class="title">Resume *</span> <button type="button">Choose a file</button> <span>or drop it here</span>' +
+      '<input type="file" name="resume" aria-label="Resume" required style="display:none"><div class="parsing" hidden>Analyzing your resume...</div><div class="fname"></div></div>';
+    var input = root.querySelector('input');
+    root.querySelector('button').addEventListener('click', function () { input.click(); });
+    input.addEventListener('change', function () {
+      var parsing = root.querySelector('.parsing');
+      parsing.hidden = false;
+      setTimeout(function () {
+        parsing.hidden = true;
+        root.querySelector('.fname').textContent = input.files.length ? input.files[0].name : '';
+        var first = document.querySelector('spl-input[name="firstName"]').shadowRoot.querySelector('input');
+        if (!first.value) first.value = 'PARSED';
+      }, 600);
+    });
+  });
+
+  var step1 =
+    '<section class="step" id="step-personal"><h2>Personal information</h2>' +
+    '<spl-input label="First name" name="firstName" autocomplete="given-name" required></spl-input>' +
+    '<spl-input label="Last name" name="lastName" autocomplete="family-name" required></spl-input>' +
+    '<spl-input label="Email" name="email" type="email" required></spl-input>' +
+    '<spl-input label="Confirm your email" name="confirmEmail" type="email" required></spl-input>' +
+    '<spl-autocomplete label="City" name="city" required></spl-autocomplete>' +
+    '<spl-phone-field></spl-phone-field>' +
+    '<h2>Resume</h2><spl-dropzone></spl-dropzone>' +
+    '<h2>Message to the Hiring Team</h2><spl-textarea label="Message to the Hiring Team" name="hiringTeamMessage"></spl-textarea>' +
+    '<h2>Your links</h2><spl-input label="LinkedIn profile" name="linkedin"></spl-input>' +
+    '<div class="footer"><button type="button" data-test="footer-next">Next</button></div></section>';
+  var step2 =
+    '<section class="step" id="step-questions"><h2>Screening questions</h2>' +
+    '<spl-radio-group label="Are you legally authorised to work in Ireland?" name="q_rtw" options=\'["Yes","No"]\' required></spl-radio-group>' +
+    '<spl-select label="How did you hear about this job?" name="q_source" options=\'["LinkedIn","Company website","Indeed","Other"]\' required></spl-select>' +
+    (variant === 'extra' ? '<spl-input label="What is your expected annual salary (EUR)?" name="q_salary" type="number" required></spl-input>' : '') +
+    '<h2>Privacy</h2>' +
+    '<spl-checkbox name="privacyConsent" label="I have read and agree to the Acme Comms Privacy Policy and consent to the processing of my personal data for this application" required></spl-checkbox>' +
+    '<spl-checkbox name="talentCommunity" label="Yes, I would like to join the Acme Comms talent community and hear about future opportunities"></spl-checkbox>' +
+    '<div class="footer"><button type="button" data-test="footer-back">Back</button> <button type="button" data-test="footer-submit">Submit</button></div></section>';
+
+  function inner(name) {
+    var host = document.querySelector('[name="' + name + '"]');
+    return host && host.shadowRoot ? host.shadowRoot.querySelector('input, select, textarea') : null;
+  }
+  function missingIn(section) {
+    var bad = [];
+    function walk(node) {
+      node.querySelectorAll('*').forEach(function (el) {
+        if (el.matches('input[required], select[required], textarea[required]')) {
+          var ok = el.type === 'checkbox' ? el.checked
+            : el.type === 'radio' ? !!el.getRootNode().querySelector('input[name="' + el.name + '"]:checked')
+            : el.type === 'file' ? el.files.length > 0
+            : !!(el.value || '').trim();
+          if (!ok) bad.push(el.name);
+        }
+        if (el.shadowRoot) walk(el.shadowRoot);
+      });
+    }
+    walk(section);
+    return bad;
+  }
+
+  var answers = {};
+  function showStep1() {
+    app.innerHTML = step1;
+    document.querySelector('[data-test="footer-next"]').addEventListener('click', function () {
+      var bad = missingIn(document.getElementById('step-personal'));
+      var city = inner('city');
+      if (city && city.value && city.getAttribute('data-picked') !== '1') bad.push('city (pick a suggestion)');
+      var old = document.getElementById('step-error'); if (old) old.remove();
+      if (bad.length) {
+        var p = document.createElement('p'); p.id = 'step-error'; p.className = 'err'; p.setAttribute('role', 'alert');
+        p.textContent = 'Please complete: ' + bad.join(', ');
+        app.appendChild(p);
+        return;
+      }
+      Object.assign(answers, window.__collectDeep(document.getElementById('step-personal')));
+      showStep2();
+    });
+  }
+  function showStep2() {
+    app.innerHTML = step2;
+    document.querySelector('[data-test="footer-back"]').addEventListener('click', showStep1);
+    document.querySelector('[data-test="footer-submit"]').addEventListener('click', function () {
+      var bad = missingIn(document.getElementById('step-questions'));
+      if (bad.length) {
+        var p = document.createElement('p'); p.className = 'err'; p.setAttribute('role', 'alert');
+        p.textContent = 'Please complete: ' + bad.join(', ');
+        app.appendChild(p);
+        return;
+      }
+      Object.assign(answers, window.__collectDeep(document.getElementById('step-questions')));
+      window.__send('smartrecruiters', answers).then(function () {
+        app.innerHTML = '<div data-test="application-success"><h1>Thank you for applying!</h1><p>Your application has been submitted. We will review it and get back to you.</p></div>';
+      });
+    });
+  }
+  setTimeout(showStep1, 300);
+})();
+</script>
+</body>
+</html>

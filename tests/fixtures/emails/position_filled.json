@@ -1,0 +1,11 @@
+{
+  "expect": { "kind": "rejection", "company": "Harbour Events" },
+  "email": {
+    "messageId": "<filled-1@harbourevents.example>",
+    "from": "Harbour Events <jobs@harbourevents.ie>",
+    "fromAddress": "jobs@harbourevents.ie",
+    "subject": "Events Coordinator vacancy",
+    "date": "2025-11-14T09:00:00.000Z",
+    "text": "Hello Kshitiz,\n\nThank you for your interest in the Events Coordinator vacancy. We wanted to let you know that the position has been filled.\n\nWe wish you the best in your search.\n\nHarbour Events"
+  }
+}

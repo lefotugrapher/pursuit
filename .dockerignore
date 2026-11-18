@@ -1,0 +1,16 @@
+node_modules
+.next
+data
+.env
+.env.*
+!.env.example
+config/*.json
+!config/*.example.json
+config/coach-context.md
+config/cv
+.pack
+*.pack.enc
+deploy/searxng/settings.yml
+tests
+*.tsbuildinfo
+.git

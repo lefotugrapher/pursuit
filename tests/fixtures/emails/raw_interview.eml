@@ -1,0 +1,17 @@
+From: "Sarah Kelly" <Sarah.Kelly@AcmeComms.ie>
+To: kayzee.test@example.com
+Subject: Interview: PR Executive
+Date: Wed, 12 Nov 2025 09:30:00 +0000
+Message-ID: <raw-1@acmecomms.example>
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="b1"
+
+--b1
+Content-Type: text/plain; charset=utf-8
+
+Hi Kshitiz, would Tuesday 18th November at 2pm work for an interview?
+--b1
+Content-Type: text/html; charset=utf-8
+
+<p>Hi Kshitiz, would <b>Tuesday 18th November at 2pm</b> work for an interview?</p><p><a href="https://calendly.com/acme/interview?a=1&amp;b=2">Book a slot</a> or <a href="mailto:sarah@acmecomms.ie">email me</a>.</p>
+--b1--

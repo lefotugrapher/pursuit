@@ -1,0 +1,100 @@
+{
+ "_note": "Trimmed real response from https://api.smartrecruiters.com/v1/companies/ryanairgroupholdings/postings?q=PR and Communications Executive (2026-11-16).",
+ "offset": 0,
+ "limit": 100,
+ "totalFound": 2,
+ "content": [
+  {
+   "id": "744000156247809",
+   "name": "Deputy Social Media Lead",
+   "uuid": "9b6b8a07-f4be-40f3-b486-16d3d6ba5a6c",
+   "jobAdId": "b684c9e4-190a-4159-b318-d01bce8c97d5",
+   "defaultJobAd": true,
+   "refNumber": "REF213H",
+   "company": {
+    "identifier": "RyanairGroupHoldings",
+    "name": "Ryanair Group Holdings"
+   },
+   "releasedDate": "2026-10-19T07:44:32.848Z",
+   "location": {
+    "city": "Swords, Dublin",
+    "country": "ie",
+    "address": "Lakeview Drive, Airside Business Park, Swords, Dublin, K67 NY94",
+    "postalCode": "K67 NY94",
+    "remote": false,
+    "hybrid": false,
+    "fullLocation": "Swords, Dublin, , Ireland"
+   },
+   "industry": {
+    "id": "airlines_aviation",
+    "label": "Airlines/Aviation"
+   },
+   "department": {},
+   "function": {
+    "id": "marketing",
+    "label": "Marketing"
+   },
+   "typeOfEmployment": {
+    "id": "permanent",
+    "label": "Full-time"
+   },
+   "experienceLevel": {
+    "id": "mid_senior_level",
+    "label": "Mid-Senior Level"
+   },
+   "visibility": "PUBLIC",
+   "ref": "https://api.smartrecruiters.com/v1/companies/ryanairgroupholdings/postings/744000156247809",
+   "language": {
+    "code": "en",
+    "label": "English",
+    "labelNative": "English (US)"
+   }
+  },
+  {
+   "id": "744000151798952",
+   "name": "PR and Communications Executive",
+   "uuid": "23dee5dd-d7b9-4489-9526-8f618a11047f",
+   "jobAdId": "81b70041-132a-4d72-985f-49bdb11a83ab",
+   "defaultJobAd": true,
+   "refNumber": "REF142W",
+   "company": {
+    "identifier": "RyanairGroupHoldings",
+    "name": "Ryanair Group Holdings"
+   },
+   "releasedDate": "2026-09-25T09:15:29.543Z",
+   "location": {
+    "city": "Swords, Dublin",
+    "country": "ie",
+    "address": "Lakeview Drive, Airside Business Park, Swords, Dublin, K67 NY94",
+    "postalCode": "K67 NY94",
+    "remote": false,
+    "hybrid": false,
+    "fullLocation": "Swords, Dublin, , Ireland"
+   },
+   "industry": {
+    "id": "airlines_aviation",
+    "label": "Airlines/Aviation"
+   },
+   "department": {},
+   "function": {
+    "id": "marketing",
+    "label": "Marketing"
+   },
+   "typeOfEmployment": {
+    "id": "permanent",
+    "label": "Full-time"
+   },
+   "experienceLevel": {
+    "id": "mid_senior_level",
+    "label": "Mid-Senior Level"
+   },
+   "visibility": "PUBLIC",
+   "ref": "https://api.smartrecruiters.com/v1/companies/ryanairgroupholdings/postings/744000151798952",
+   "language": {
+    "code": "en-GB",
+    "label": "English (UK)",
+    "labelNative": "English (UK)"
+   }
+  }
+ ]
+}

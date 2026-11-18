@@ -1,0 +1,37 @@
+# Pursuit stack. Start: `docker compose up -d --build`. Dashboard: http://localhost:7020 (bound to this machine only).
+# NEVER publish port 7020 to the internet: the dashboard has no login. On a cloud server, reach it with an SSH tunnel.
+services:
+  web:
+    build: .
+    image: pursuit:latest
+    command: ["node_modules/.bin/next", "start", "-p", "7020"]
+    ports: ["127.0.0.1:7020:7020"]
+    env_file: [.env.local]
+    environment:
+      SEARXNG_URL: http://searxng:8080
+    volumes:
+      - ./data:/app/data
+      - ./config:/app/config
+    restart: unless-stopped
+
+  worker:
+    image: pursuit:latest
+    depends_on: [web, searxng]
+    command: ["node_modules/.bin/tsx", "src/worker/index.ts"]
+    env_file: [.env.local]
+    environment:
+      SEARXNG_URL: http://searxng:8080
+    volumes:
+      - ./data:/app/data
+      - ./config:/app/config
+    shm_size: "1gb"   # Chromium needs more shared memory than Docker's 64 MB default
+    restart: unless-stopped
+
+  # Private, free web search for finding employer careers pages (no API key, no tracking).
+  searxng:
+    image: searxng/searxng:latest
+    volumes:
+      - ./deploy/searxng:/etc/searxng
+    environment:
+      SEARXNG_BASE_URL: http://searxng:8080/
+    restart: unless-stopped

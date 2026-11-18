@@ -1,0 +1,11 @@
+{
+  "expect": { "kind": "confirmation", "company": "Northlight Agency" },
+  "email": {
+    "messageId": "<confirm-1@greenhouse.example>",
+    "from": "Northlight Agency <no-reply@greenhouse.io>",
+    "fromAddress": "no-reply@greenhouse.io",
+    "subject": "Thank you for applying to Northlight Agency",
+    "date": "2025-11-10T16:20:00.000Z",
+    "text": "Hi Kshitiz,\n\nThank you for your interest in Northlight Agency! We have received your application for the Social Media Executive position.\n\nOur hiring team will review your application and will be in touch if your qualifications match our needs.\n\nRegards,\nNorthlight Agency Recruiting\n\nPowered by Greenhouse"
+  }
+}

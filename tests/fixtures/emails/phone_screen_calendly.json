@@ -1,0 +1,11 @@
+{
+  "expect": { "kind": "interview", "company": "Northlight Agency" },
+  "email": {
+    "messageId": "<screen-1@northlight.example>",
+    "from": "Northlight Agency Talent <talent@northlightagency.ie>",
+    "fromAddress": "talent@northlightagency.ie",
+    "subject": "Quick phone screen?",
+    "date": "2025-11-13T10:00:00.000Z",
+    "text": "Hi Kshitiz,\n\nThanks for applying to Northlight Agency. I'd love to set up a 20 minute phone screen. Please pick a slot that suits you here: https://calendly.com/northlight-talent/20min\n\nCheers,\nNiamh"
+  }
+}

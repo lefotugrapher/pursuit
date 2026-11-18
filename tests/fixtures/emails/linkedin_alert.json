@@ -1,0 +1,12 @@
+{
+  "expect": { "kind": "job_alert" },
+  "email": {
+    "messageId": "<alert-1@linkedin.example>",
+    "from": "LinkedIn Job Alerts <jobalerts-noreply@linkedin.com>",
+    "fromAddress": "jobalerts-noreply@linkedin.com",
+    "subject": "\"PR executive\": Dublin - 2 new jobs",
+    "date": "2025-11-12T07:00:00.000Z",
+    "text": "Your job alert for PR executive in Dublin\n\nCommunications Executive\nCairn Foods\nDublin, County Dublin, Ireland\nView job: https://www.linkedin.com/comm/jobs/view/4012345678/?trackingId=abc\n\nPR Assistant\nLiffey Partners\nDublin, County Dublin, Ireland\nView job: https://www.linkedin.com/comm/jobs/view/4012345679/?trackingId=def\n\nUnsubscribe: https://www.linkedin.com/comm/jobs/alerts",
+    "html": "<html><body><p>Your job alert for PR executive in Dublin</p><table><tr><td><a href=\"https://www.linkedin.com/comm/jobs/view/4012345678/?trackingId=abc\">Communications Executive</a><p>Cairn Foods · Dublin, County Dublin, Ireland</p></td></tr><tr><td><a href=\"https://www.linkedin.com/comm/jobs/view/4012345679/?trackingId=def\">PR Assistant</a><p>Liffey Partners · Dublin, County Dublin, Ireland</p></td></tr></table><a href=\"https://www.linkedin.com/comm/jobs/alerts\">Manage alerts</a></body></html>"
+  }
+}

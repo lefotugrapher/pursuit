@@ -1,0 +1,8 @@
+{
+ "_note": "Structural fixture following the SearXNG format=json response schema.",
+ "query": "\"Cushman & Wakefield\" \"Events Coordinator\"",
+ "results": [
+  { "url": "https://careers.cushmanwakefield.com/en/jobs/r343808/events-coordinator/", "title": "Events Coordinator, Dublin, Ireland | Cushman & Wakefield Careers", "content": "Events Coordinator. Dublin, Ireland. Apply now.", "engine": "duckduckgo" },
+  { "url": "https://ie.linkedin.com/jobs/view/events-coordinator-at-cushman-wakefield-4490728868", "title": "Events Coordinator at Cushman & Wakefield", "content": "Dublin, County Dublin", "engine": "bing" }
+ ]
+}

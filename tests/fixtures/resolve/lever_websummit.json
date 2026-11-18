@@ -1,0 +1,56 @@
+[
+ {
+  "id": "90406f14-e384-44ce-8280-aef592817fea",
+  "text": "Advertising Associate",
+  "hostedUrl": "https://jobs.lever.co/websummit/90406f14-e384-44ce-8280-aef592817fea",
+  "applyUrl": "https://jobs.lever.co/websummit/90406f14-e384-44ce-8280-aef592817fea/apply",
+  "categories": {
+   "commitment": "Full-Time Permanent",
+   "location": "Dublin",
+   "team": "Advertising, Content + Marketing",
+   "allLocations": [
+    "Dublin",
+    "Lisbon"
+   ]
+  },
+  "country": "IE",
+  "workplaceType": "hybrid",
+  "createdAt": 1750419480416
+ },
+ {
+  "id": "c6030d56-5357-4fea-a7b8-18dcbe08b3ea",
+  "text": "Advertising Associate",
+  "hostedUrl": "https://jobs.lever.co/websummit/c6030d56-5357-4fea-a7b8-18dcbe08b3ea",
+  "applyUrl": "https://jobs.lever.co/websummit/c6030d56-5357-4fea-a7b8-18dcbe08b3ea/apply",
+  "categories": {
+   "commitment": "Full-Time Permanent",
+   "location": "Lisbon",
+   "team": "Advertising, Content + Marketing",
+   "allLocations": [
+    "Lisbon",
+    "Dublin"
+   ]
+  },
+  "country": "PT",
+  "workplaceType": "hybrid",
+  "createdAt": 1784728408280
+ },
+ {
+  "id": "5cfe70ea-523b-4a87-99d7-ba10f7503436",
+  "text": "Investors Associate - Mandarin",
+  "hostedUrl": "https://jobs.lever.co/websummit/5cfe70ea-523b-4a87-99d7-ba10f7503436",
+  "applyUrl": "https://jobs.lever.co/websummit/5cfe70ea-523b-4a87-99d7-ba10f7503436/apply",
+  "categories": {
+   "commitment": "Full-Time Permanent",
+   "location": "Lisbon",
+   "team": "Investors",
+   "allLocations": [
+    "Lisbon",
+    "Dublin"
+   ]
+  },
+  "country": "PT",
+  "workplaceType": "hybrid",
+  "createdAt": 1786630515418
+ }
+]

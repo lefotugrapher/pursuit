@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<!--
+  Generic candidate-portal wall of the kind Workday / iCIMS / Taleo / SuccessFactors career sites show
+  after "Apply" (here on a company domain): "Sign in to apply" with email + password, and a
+  "Create Account" button. The runner must stop with account_required and type nothing.
+-->
+<html lang="en">
+<head><meta charset="utf-8"><title>Candidate Home | Acme Retail Careers</title><script src="/_harness.js"></script></head>
+<body>
+<main>
+  <h1>PR Executive</h1>
+  <p>Sign in to apply for this job, or create an account if you are new here.</p>
+  <form id="signin">
+    <label for="u">Email Address</label> <input id="u" type="email" name="username">
+    <label for="p">Password</label> <input id="p" type="password" name="password">
+    <button type="submit" data-automation-id="signInSubmitButton">Sign In</button>
+  </form>
+  <button type="button" data-automation-id="createAccountLink">Create Account</button>
+</main>
+<script>
+  document.getElementById('signin').addEventListener('submit', function (e) { e.preventDefault(); window.__send('wall', { username: document.getElementById('u').value }); });
+</script>
+</body>
+</html>

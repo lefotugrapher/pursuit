@@ -1,0 +1,100 @@
+{
+  "version": 1,
+  "summaries": {
+    "pr_comms": "Communications graduate (BA Example Studies, Example University) who wrote press releases for a charity fun run and ran a student society's newsletter for two years.",
+    "content_social": "Content creator who shoots and edits short-form video and grew the Example Society Instagram account to 1,200 followers.",
+    "digital_marketing": "Marketing graduate who ran a 6-week paid social test for a local cafe and reported weekly results to the owner.",
+    "events_community": "Organised a charity fun run with 150 runners and ran weekly society meet-ups during college.",
+    "general": "Communications graduate (BA Example Studies, Example University) who writes press releases, shoots short-form video and has organised a charity fun run with 150 runners."
+  },
+  "facts": [
+    {
+      "id": "example-society-role",
+      "kind": "role",
+      "text": "Communications Officer of the Example Society at Example University from Sep 2023 to May 2025.",
+      "org": "Example Society",
+      "title": "Communications Officer",
+      "start": "2023-09",
+      "end": "2025-05",
+      "tags": ["comms", "student-engagement"],
+      "numbers": ["2023", "2025"],
+      "cvSection": "WORK EXPERIENCE"
+    },
+    {
+      "id": "example-society-newsletter",
+      "kind": "achievement",
+      "text": "Wrote and sent the Example Society's fortnightly Mailchimp newsletter for two years.",
+      "org": "Example Society",
+      "title": "Communications Officer",
+      "start": "2023-09",
+      "end": "2025-05",
+      "tags": ["comms", "copywriting", "email"],
+      "numbers": ["two", "2"],
+      "cvSection": "WORK EXPERIENCE",
+      "cvBullet": "Wrote and sent the society's fortnightly Mailchimp newsletter for two years."
+    },
+    {
+      "id": "example-society-instagram",
+      "kind": "achievement",
+      "text": "Grew the Example Society Instagram account to 1,200 followers with short-form video.",
+      "org": "Example Society",
+      "title": "Communications Officer",
+      "start": "2023-09",
+      "end": "2025-05",
+      "tags": ["social", "content", "video", "metrics"],
+      "numbers": ["1,200", "1200"],
+      "cvSection": "WORK EXPERIENCE",
+      "cvBullet": "Grew the society's Instagram account to 1,200 followers with short-form video."
+    },
+    {
+      "id": "example-fun-run",
+      "kind": "project",
+      "text": "Organised a charity fun run for Example Charity with 150 runners and wrote its press releases.",
+      "org": "Example Charity",
+      "title": "Event Volunteer",
+      "start": "2024-03",
+      "end": "2024-04",
+      "tags": ["events", "pr", "press-releases", "charity"],
+      "numbers": ["150"],
+      "cvSection": "PROJECTS",
+      "cvBullet": "Organised a charity fun run with 150 runners and wrote its press releases."
+    },
+    {
+      "id": "example-cafe-paid-social",
+      "kind": "project",
+      "text": "Ran a 6-week paid social test for Example Cafe and reported weekly results to the owner.",
+      "org": "Example Cafe",
+      "title": "Freelance Marketer",
+      "start": "2024-06",
+      "end": "2024-07",
+      "tags": ["digital-marketing", "paid-social", "analytics"],
+      "numbers": ["6-week", "6"],
+      "cvSection": "PROJECTS",
+      "cvBullet": "Ran a 6-week paid social test for a local cafe and reported weekly results to the owner."
+    },
+    {
+      "id": "example-degree",
+      "kind": "education",
+      "text": "BA Example Studies at Example University from Sep 2021 to May 2025.",
+      "org": "Example University",
+      "title": "BA Example Studies",
+      "start": "2021-09",
+      "end": "2025-05",
+      "tags": ["education", "degree"],
+      "numbers": ["2021", "2025"],
+      "cvSection": "EDUCATION"
+    },
+    {
+      "id": "example-skills",
+      "kind": "skill",
+      "text": "Skills: press releases, copywriting, short-form video, paid social, event organisation.",
+      "tags": ["skills-section"],
+      "numbers": [],
+      "cvSection": "SKILLS",
+      "cvBullet": "Skills: press releases, copywriting, short-form video, paid social, event organisation"
+    }
+  ],
+  "skills": ["press releases", "copywriting", "short-form video", "paid social", "event organisation"],
+  "tools": ["Mailchimp", "Instagram"],
+  "doNotClaim": ["media monitoring", "years of experience", "Microsoft Office"]
+}

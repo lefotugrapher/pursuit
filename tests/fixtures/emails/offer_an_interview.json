@@ -1,0 +1,11 @@
+{
+  "expect": { "kind": "interview", "company": "Brightwave Media" },
+  "email": {
+    "messageId": "<trick-1@brightwavemedia.example>",
+    "from": "Aoife Byrne <aoife@brightwavemedia.com>",
+    "fromAddress": "aoife@brightwavemedia.com",
+    "subject": "Content Executive",
+    "date": "2025-11-12T15:00:00.000Z",
+    "text": "Hi Kshitiz,\n\nWe'd be happy to offer you an interview for the Content Executive role. Are you available on Thursday at 11am for a video call?\n\nThanks,\nAoife"
+  }
+}

@@ -1,0 +1,15 @@
+{
+ "_note": "Trimmed real response from POST https://wd5.myworkdaysite.com/wday/cxs/microchiphr/External/jobs searchText=\"Centralized Marketing Specialist\" (2026-11-16).",
+ "total": 1,
+ "jobPostings": [
+  {
+   "title": "Centralized Marketing Specialist",
+   "externalPath": "/job/Ireland---Dublin-MCHP/Centralized-Marketing-Specialist_R4258-26",
+   "locationsText": "2 Locations",
+   "postedOn": "Posted 24 Days Ago",
+   "bulletFields": [
+    "R4258-26"
+   ]
+  }
+ ]
+}

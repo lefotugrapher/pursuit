@@ -1,0 +1,11 @@
+{
+  "expect": { "kind": "other" },
+  "email": {
+    "messageId": "<news-1@shop.example>",
+    "from": "Bean Box <news@beanbox.example>",
+    "fromAddress": "news@beanbox.example",
+    "subject": "Our November roast is here",
+    "date": "2025-11-12T08:00:00.000Z",
+    "text": "Hello coffee lover,\n\nOur November single origin has landed. Free delivery on orders over 30 euro this week.\n\nThe Bean Box crew"
+  }
+}

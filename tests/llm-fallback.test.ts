@@ -58,6 +58,7 @@ beforeEach(() => {
   process.env.GEMINI_API_KEY = '';
   process.env.GROQ_API_KEY = '';
   process.env.ORCAROUTER_API_KEY = '';
+  process.env.ANTHROPIC_API_KEY = '';
   delete process.env.ORCAROUTER_MODELS;
   process.env.LLM_LOCAL = '0';
   process.env.OLLAMA_URL = 'http://ollama.test:11434';
@@ -261,6 +262,87 @@ describe('hasLLM', () => {
     assert.deepEqual(urls, ['http://ollama.test:11434/api/tags']);
     stub(() => { throw new Error('connection refused'); });
     assert.equal(await envm.refreshLocalProbe(), false);
+  });
+});
+
+describe('paid Claude tier', () => {
+  const CLAUDE_URL = 'https://api.anthropic.com/v1/messages';
+  const isClaude = (u: string) => u === CLAUDE_URL;
+  const claude = (text: string, model = 'claude-opus-5-5') => json({
+    id: 'msg_test', type: 'message', role: 'assistant', model, content: [{ type: 'text', text }],
+    stop_reason: 'end_turn', stop_sequence: null, usage: { input_tokens: 1000, output_tokens: 500 },
+  });
+  const letter = { ...base, purpose: 'letter.write' };
+
+  beforeEach(() => {
+    process.env.ANTHROPIC_API_KEY = 'sk-ant-test-123456';
+    delete process.env.ANTHROPIC_MODEL;
+    delete process.env.ANTHROPIC_FAST_MODEL;
+    delete process.env.LLM_PREMIUM_DAILY_USD;
+    delete process.env.LLM_PREMIUM_TOTAL_USD;
+  });
+
+  test('apply-time purposes go to Claude and the spend is recorded; everything else stays free', async () => {
+    stub((u) => (isClaude(u) ? claude('{"ok":true}') : completion('{"ok":true}')));
+    assert.deepEqual(await llm.llmJSON(letter), { ok: true });
+    assert.deepEqual(urls, [CLAUDE_URL]);
+    assert.equal(bodies[0].model, 'claude-opus-5-5');
+    assert.equal(bodies[0].temperature, undefined, 'Opus 5.5 rejects sampling parameters');
+    assert.equal(bodies[0].thinking, undefined, 'thinking stays adaptive');
+    assert.deepEqual(bodies[0].output_config, { effort: 'medium' });
+    assert.match(String(bodies[0].system), /You judge/);
+    const [row] = usage();
+    assert.equal(row.model, 'anthropic/claude-opus-5-5');
+    assert.ok(Math.abs((row.cost_usd ?? 0) - 0.014) < 1e-9, '1000 in at $4/M + 500 out at $20/M');
+
+    for (const purpose of ['score', 'coach.chat', 'jobchat', 'inbox.classify', 'outreach.email', 'telegram.chat']) {
+      stub((u) => (isClaude(u) ? claude('{"ok":true}') : completion('{"ok":true}')));
+      await llm.llmJSON({ ...base, purpose });
+      assert.deepEqual(urls, [llm.OPENROUTER_URL], `${purpose} must not use the paid key`);
+    }
+  });
+
+  test('the fit check runs on the cheap model at low effort', async () => {
+    stub(() => claude('{"ok":true}', 'claude-haiku-5-5'));
+    await llm.llmJSON({ ...base, purpose: 'apply.fit' });
+    assert.equal(bodies[0].model, 'claude-haiku-5-5');
+    assert.deepEqual(bodies[0].output_config, { effort: 'low' });
+    assert.ok(Math.abs((usage()[0].cost_usd ?? 0) - 0.00035) < 1e-9);
+  });
+
+  test('past the daily or total cap, calls go back to the free models', async () => {
+    stub((u) => (isClaude(u) ? claude('{"ok":true}') : completion('{"ok":true}')));
+    await llm.llmJSON(letter); // $0.014 spent
+    process.env.LLM_PREMIUM_DAILY_USD = '0.01';
+    assert.match(llm.premiumSkipReason('letter.write') ?? '', /daily cap/);
+    stub((u) => (isClaude(u) ? claude('{"ok":true}') : completion('{"ok":true}')));
+    assert.deepEqual(await llm.llmJSON(letter), { ok: true });
+    assert.deepEqual(urls, [llm.OPENROUTER_URL]);
+    delete process.env.LLM_PREMIUM_DAILY_USD;
+    process.env.LLM_PREMIUM_TOTAL_USD = '0.01';
+    assert.match(llm.premiumSkipReason('letter.write') ?? '', /total cap/);
+  });
+
+  test('a rejected key falls through to the free models and stops being retried', async () => {
+    const rejected = () => json({ type: 'error', error: { type: 'authentication_error', message: 'invalid x-api-key' } }, 401);
+    stub((u) => (isClaude(u) ? rejected() : completion('{"ok":true}')));
+    assert.deepEqual(await llm.llmJSON(letter), { ok: true });
+    assert.deepEqual(urls, [CLAUDE_URL, llm.OPENROUTER_URL]);
+    stub((u) => (isClaude(u) ? rejected() : completion('{"ok":true}')));
+    await llm.llmJSON(letter);
+    assert.deepEqual(urls, [llm.OPENROUTER_URL]);
+  });
+
+  test('a declined reply is billed in the ledger and the free models answer instead', async () => {
+    stub((u) => (isClaude(u)
+      ? json({ id: 'msg_r', type: 'message', role: 'assistant', model: 'claude-opus-5-5', content: [], stop_reason: 'refusal', stop_details: { type: 'refusal', category: null }, usage: { input_tokens: 1000, output_tokens: 0 } })
+      : completion('{"ok":true}')));
+    assert.deepEqual(await llm.llmJSON(letter), { ok: true });
+    const rows = usage();
+    assert.equal(rows[0].purpose, 'letter.write:premium-miss');
+    assert.equal(rows[0].ok, 0);
+    assert.ok((rows[0].cost_usd ?? 0) > 0);
+    assert.equal(rows[1].model, 'a/one:free');
   });
 });
 

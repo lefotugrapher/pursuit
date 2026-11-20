@@ -25,6 +25,7 @@ process.env.OPENROUTER_API_KEY = '';
 process.env.GEMINI_API_KEY = '';
 process.env.GROQ_API_KEY = '';
 process.env.ORCAROUTER_API_KEY = '';
+process.env.ANTHROPIC_API_KEY = '';
 process.env.NTFY_TOPIC = '';
 process.env.GMAIL_USER = '';
 process.env.GMAIL_APP_PASSWORD = '';

@@ -4,6 +4,7 @@ process.env.OPENROUTER_API_KEY = '';
 process.env.GEMINI_API_KEY = '';
 process.env.GROQ_API_KEY = '';
 process.env.ORCAROUTER_API_KEY = '';
+process.env.ANTHROPIC_API_KEY = '';
 
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';

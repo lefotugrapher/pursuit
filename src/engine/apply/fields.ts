@@ -190,7 +190,8 @@ export type StandardKind = 'first' | 'last' | 'full' | 'preferred' | 'email' | '
 
 const TEXTY = new Set<RawField['kind']>(['text', 'email', 'tel', 'url', 'textarea']);
 const DIAL_LABEL_RE = /\b(country (calling )?code|calling code|dial(l)?ing code|dial code|phone (country|prefix|code)|country prefix|area code|prefix)\b/;
-const COVER_TEXT_RE = /\b(cover(ing)? letter|motivation(al)? letter|letter of motivation|message to the hiring (team|manager)|message for the hiring (team|manager)|note to the hiring (team|manager))\b/;
+const COVER_TEXT_RE = /\b(cover(ing)? letter|motivation(al)? letter|letter of motivation|message to the hiring (team|manager)|message for the hiring (team|manager)|note to the hiring (team|manager)|let the company know (about )?your interest)\b/;
+const SOCIAL_LINK_RE = /^(facebook|x|twitter|x fka twitter|x formerly twitter|instagram|tiktok|youtube|snapchat|pinterest|behance|dribbble|medium|threads|bluesky|mastodon|xing|other (link|url|website))( (profile|url|link|page|handle|username))?$/;
 const LOCATION_LABEL_RE = /^(current |your |home )?(location|address|city|town|city of residence|location city|location \(city\)|city \(location\))( city)?$|^where are you (currently )?(based|located)$/;
 
 /** Which profile field a form control asks for, if any. Deliberately strict: a wrong match fills a wrong box. */
@@ -204,6 +205,8 @@ export function standardKind(field: Pick<RawField, 'kind' | 'label' | 'name' | '
     if (/cover/.test(n) || /cover/.test(nm)) return 'cover_file';
     if (/\b(resume|cv|curriculum)\b/.test(n) || /resume|(^|[_\W])cv([_\W]|$)/.test(nm)) return 'cv';
     if (field.required && /^(attach(ment)?s?|upload( a)?( file)?|documents?|files?|upload (your )?documents?)$/.test(n)) return 'cv';
+    // SmartRecruiters' dropzone input often carries no label at all; the only upload on that form is the resume.
+    if (ats === 'smartrecruiters' && (!n || /^(choose|select|upload|drop|browse)\b/.test(n))) return 'cv';
     return null;
   }
   if (kind === 'textarea') {
@@ -372,6 +375,9 @@ export function decide(field: RawField, pkg: ApplyPackage, ctx: FillContext): De
     const v = standardValue(std, pkg);
     if (v) return { action: 'fill', value: v, source: 'profile' };
   }
+
+  // A profile link he doesn't have (Facebook, X...) is left blank, never raised as a question to answer.
+  if (!std && TEXTY.has(field.kind) && SOCIAL_LINK_RE.test(normalizeText(label))) return { action: 'skip' };
 
   if (usable(answer)) return { action: 'fill', value: answer.answer, source: 'answers' };
   const entry = matchBankEntry(label, ctx.bank);

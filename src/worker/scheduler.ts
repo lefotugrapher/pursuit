@@ -26,8 +26,9 @@ type Schedule =
 
 export const SCHEDULES: Record<TaskName, Schedule> = {
   discover: { kind: 'interval', everyMs: (s) => s.discoveryEveryHours * HOUR, skipQuietHours: true },
-  score: { kind: 'interval', everyMs: () => 2 * MIN },
-  tailor: { kind: 'interval', everyMs: () => 2 * MIN },
+  // Short gaps between stages so a job found by discovery is scored, tailored, approved and sent within minutes.
+  score: { kind: 'interval', everyMs: () => 30_000 },
+  tailor: { kind: 'interval', everyMs: () => 1 * MIN },
   apply: { kind: 'interval', everyMs: () => 1 * MIN },
   send: { kind: 'interval', everyMs: () => 1 * MIN },
   inbox: { kind: 'interval', everyMs: () => 10 * MIN },
@@ -42,7 +43,7 @@ export const SCHEDULES: Record<TaskName, Schedule> = {
   digest: { kind: 'daily', at: '08:00' },
   autopilot: {
     kind: 'interval',
-    everyMs: () => 15 * MIN,
+    everyMs: () => 1 * MIN,
     skipQuietHours: true,
     enabled: (s) => s.mode === 'autopilot' && s.autopilot.enabled,
   },

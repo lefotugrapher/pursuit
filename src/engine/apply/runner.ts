@@ -79,7 +79,12 @@ export interface HandoffOptions {
    * with a screenshot, exactly as an automatic submission would be. Pursuit never touches the CAPTCHA itself.
    */
   watchMs?: number;
+  /** Hands-free: once the form is completely filled, press Submit as well. A human check is still his to clear. */
+  autoSubmit?: boolean;
 }
+
+/** Any of these on the page means an application form is showing (Playwright CSS reaches into open shadow roots). */
+const FORM_PROBE = 'input[type="email"], input[type="file"], input[autocomplete="given-name"], input[name*="firstName" i]';
 
 /**
  * Greenhouse's embeddable application form. Big employers point absolute_url (and the hosted board,
@@ -632,19 +637,56 @@ async function runHandoff(jobId: string, opts: HandoffOptions): Promise<ApplyOut
       needs.push(...pre.blockers.map((b) => describeBlocker(b, effective)));
       let questions: ScreeningQuestion[] | undefined;
       if (walled) needs.push(accountWallNeed(effective, page.url()));
+      let submitBaseline: Awaited<ReturnType<typeof captureBaseline>> | undefined;
       if (built && !walled && !hardBlockers(pre.blockers).length) {
         const pkg: ApplyPackage = built.pkg;
         const bank = safeLoadBank();
-        const fill = await adapterFill(page, pkg, adapterFor(effective), { bank, resolve: makeResolver({ pkg, bank }) });
+        const fillAdapter = adapterFor(effective);
+        const doFill = () => adapterFill(page, pkg, fillAdapter, { bank, resolve: makeResolver({ pkg, bank }) });
+        let fill = await doFill();
+        // Some sites only raise their human check after "Apply" is clicked (SmartRecruiters), so the first pass finds
+        // a wall instead of a form. Keep the window up, wait for Kayzee to clear it, then fill what appears.
+        const formHidden = () => fill.blockers.includes('captcha') || fill.unfilledRequired.includes('application form');
+        for (let round = 0; round < 3 && watching && formHidden() && !page.isClosed() && Date.now() < deadline; round++) {
+          keepOpenForHandoff(page);
+          let cleared = false;
+          while (Date.now() < deadline && !page.isClosed()) {
+            await page.waitForTimeout(2_000).catch(() => undefined);
+            const now = await scanBlockers(page).catch(() => null);
+            if (!now || now.blockers.includes('captcha')) continue;
+            if (await page.locator(FORM_PROBE).count().catch(() => 0)) {
+              cleared = true;
+              break;
+            }
+          }
+          if (!cleared) break;
+          fill = await doFill();
+        }
         recordQuestionsSeen(jobId, fill.questionsSeen, fill.unanswered);
         questions = fill.unanswered;
-        needs.push(...built.missing, ...needsFromFill(fill, effective).filter((n) => !needs.includes(n)));
-        logEvent('apply.filled', { ats: effective, filled: fill.filled, unfilledRequired: fill.unfilledRequired, handoff: true }, jobId);
+        const fillNeeds = needsFromFill(fill, effective);
+        needs.push(...built.missing, ...fillNeeds.filter((n) => !needs.includes(n)));
+        logEvent('apply.filled', {
+          ats: effective, filled: fill.filled, unfilledRequired: fill.unfilledRequired, failedFills: fill.failedFills,
+          reasons: fill.reasons, steps: fill.steps, handoff: true,
+        }, jobId);
+        // Everything is filled and he asked for hands-free: press Submit too, so his only job is the human check.
+        const complete = !built.missing.length && !fillNeeds.length && fill.filled.length > 0 && fill.submitReady === true;
+        if (opts.autoSubmit && watching && fillAdapter.canSubmit && complete && !page.isClosed()) {
+          try {
+            submitBaseline = await captureBaseline(page);
+            const via = await clickSubmit(page, fillAdapter);
+            logEvent('apply.submitted', { via, handoff: true }, jobId);
+          } catch (err) {
+            submitBaseline = undefined;
+            logEvent('apply.handoff_submit_skipped', { error: errorText(err) }, jobId);
+          }
+        }
       }
       if (!headless) keepOpenForHandoff(page);
       if (watching && !walled && !page.isClosed() && Date.now() < deadline) {
         const adapter = adapterFor(effective);
-        const baseline = await captureBaseline(page);
+        const baseline = submitBaseline ?? await captureBaseline(page);
         const result = await waitForConfirmation(page, baseline, { timeoutMs: Math.max(0, deadline - Date.now()), human: true, pollMs: 1_500, successSelectors: adapter.successSelectors });
         if (result.confirmed || result.alreadyApplied) {
           const confirmation = result.evidence ?? (result.alreadyApplied ? `already applied: ${result.alreadyApplied}` : 'confirmed');

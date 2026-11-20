@@ -2,7 +2,7 @@
 import type { SVGProps } from 'react';
 
 export type IconName =
-  | 'today' | 'queue' | 'jobs' | 'pipeline' | 'inbox' | 'outreach' | 'interviews' | 'coach' | 'analytics' | 'sources' | 'settings'
+  | 'today' | 'queue' | 'jobs' | 'pipeline' | 'inbox' | 'outreach' | 'interviews' | 'about' | 'coach' | 'analytics' | 'sources' | 'settings'
   | 'search' | 'command' | 'pause' | 'play' | 'menu' | 'close' | 'external' | 'left' | 'right' | 'check' | 'skip'
   | 'edit' | 'spark' | 'star' | 'refresh' | 'alert' | 'bolt' | 'hand' | 'file' | 'clock' | 'down';
 
@@ -14,6 +14,7 @@ const PATHS: Record<IconName, string> = {
   inbox: 'M2 9.5 3.6 3.6A1.5 1.5 0 0 1 5 2.5h6a1.5 1.5 0 0 1 1.4 1.1L14 9.5v2a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 11.5v-2ZM2 9.5h3.5l1 1.5h3l1-1.5H14',
   outreach: 'M14 2 7 9M14 2l-4.5 12-2.5-5-5-2.5L14 2Z',
   interviews: 'M3 3.5h10a1 1 0 0 1 1 1V13a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4.5a1 1 0 0 1 1-1ZM2 6.5h12M5 2v3M11 2v3',
+  about: 'M8 8a2.75 2.75 0 1 0 0-5.5A2.75 2.75 0 0 0 8 8ZM2.75 13.5a5.25 5.25 0 0 1 10.5 0',
   coach: 'M2.5 4a1.5 1.5 0 0 1 1.5-1.5h8A1.5 1.5 0 0 1 13.5 4v5.5A1.5 1.5 0 0 1 12 11H7l-3 2.5V11h0A1.5 1.5 0 0 1 2.5 9.5V4ZM5.5 6.5h5M5.5 8.5h3',
   analytics: 'M2.5 13.5h11M4 11V8M7 11V4.5M10 11V6.5M13 11V3',
   sources: 'M8 14A6 6 0 1 0 8 2a6 6 0 0 0 0 12ZM8 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM8 8l4.2-4.2',

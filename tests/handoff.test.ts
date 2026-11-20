@@ -104,15 +104,15 @@ describe('session', () => {
 });
 
 describe('nudge', () => {
-  test('one message per 6 hours, never in quiet hours or during a session', () => {
+  test('one message a day, never in quiet hours or during a session', () => {
     const now = new Date('2026-11-17T10:00:00Z');
     assert.equal(h.handoffNudge(now, false), null); // nothing waiting
     job('A', ['CAPTCHA or bot check on the page']);
     assert.equal(h.handoffNudge(now, true), null);
     assert.match(h.handoffNudge(now, false) ?? '', /1 application is filled in[\s\S]*Reply GO/);
-    assert.equal(h.handoffNudge(new Date(now.getTime() + 3_600_000), false), null);
-    assert.ok(h.handoffNudge(new Date(now.getTime() + 7 * 3_600_000), false));
+    assert.equal(h.handoffNudge(new Date(now.getTime() + 7 * 3_600_000), false), null);
+    assert.ok(h.handoffNudge(new Date(now.getTime() + 21 * 3_600_000), false));
     h.startHandoffSession();
-    assert.equal(h.handoffNudge(new Date(now.getTime() + 20 * 3_600_000), false), null);
+    assert.equal(h.handoffNudge(new Date(now.getTime() + 60 * 3_600_000), false), null);
   });
 });

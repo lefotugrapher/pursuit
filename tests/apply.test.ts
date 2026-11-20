@@ -270,6 +270,16 @@ describe('field helpers', () => {
     assert.equal(fields.standardKind(f({ label: 'LinkedIn URL', name: 'urls[LinkedIn]' })), 'linkedin');
     assert.equal(fields.standardKind(f({ kind: 'file', label: 'Resume/CV', id: 'resume' })), 'cv');
     assert.equal(fields.standardKind(f({ kind: 'file', label: 'Cover Letter', id: 'cover_letter' })), 'cover_file');
+    // SmartRecruiters (seen on Ryanair, Nov 2026): the message box is the cover letter, the bare dropzone is the CV.
+    assert.equal(fields.standardKind(f({ kind: 'textarea', label: 'Let the company know about your interest working there' }), 'smartrecruiters'), 'cover_text');
+    assert.equal(fields.standardKind(f({ kind: 'file', label: '' }), 'smartrecruiters'), 'cv');
+    assert.equal(fields.standardKind(f({ kind: 'file', label: '' }), 'greenhouse'), null);
+    // A social link he doesn't have is left blank even when the page marks it required; a real question still isn't.
+    const pkgNoLinks = { profile: { name: { first: 'A', last: 'B', full: 'A B' }, email: 'a@example.com', phone: '', location: '', links: {} }, answers: [], cvPdfPath: '' } as never;
+    for (const label of ['Facebook', 'X (fka Twitter)', 'Instagram URL']) {
+      assert.equal(fields.decide(f({ label, required: true }), pkgNoLinks, { ats: 'smartrecruiters', bank: { entries: [] } }).action, 'skip', label);
+    }
+    assert.equal(fields.decide(f({ label: 'Why Ryanair?', required: true }), pkgNoLinks, { ats: 'smartrecruiters', bank: { entries: [] } }).action, 'need');
     assert.equal(fields.standardKind(f({ kind: 'textarea', label: 'Additional information', name: 'comments' }), 'lever'), 'cover_text');
     assert.equal(fields.standardKind(f({ kind: 'combobox', label: 'Country', id: 'country' })), 'country');
     assert.equal(fields.standardKind(f({ label: 'Current or most recent company?' })), null);

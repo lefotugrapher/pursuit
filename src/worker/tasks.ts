@@ -116,7 +116,7 @@ export const TASKS: Record<TaskName, TaskDef> = {
       const { openForHandoff } = await import('@/engine/apply/runner');
       const { notifyTelegram } = await import('@/engine/telegram/outbox');
       return toStats(await handoffStep({
-        open: (jobId, watchMs) => openForHandoff(jobId, { watchMs }),
+        open: (jobId, watchMs) => openForHandoff(jobId, { watchMs, autoSubmit: getSettings().autopilot.handsFree === true }),
         notify: (text) => void notifyTelegram(text, { high: true }),
       }));
     },

@@ -1304,6 +1304,15 @@ export function recordLLM(u: LLMUsage): void {
   );
 }
 
+/** USD recorded against models whose id starts with `modelPrefix` (e.g. "anthropic/"), optionally since a time. */
+export function llmSpendUsd(modelPrefix: string, sinceIso?: string): number {
+  const like = `${modelPrefix.replace(/[%_]/g, '')}%`;
+  const row = sinceIso
+    ? get('SELECT COALESCE(SUM(cost_usd), 0) AS cost FROM llm_usage WHERE model LIKE ? AND ts >= ?', like, toIso(sinceIso) ?? sinceIso)
+    : get('SELECT COALESCE(SUM(cost_usd), 0) AS cost FROM llm_usage WHERE model LIKE ?', like);
+  return Number(row?.cost ?? 0);
+}
+
 export function llmUsageSummary(sinceIso: string): LLMUsageSummary {
   const since = toIso(sinceIso) ?? sinceIso;
   const totals = get(

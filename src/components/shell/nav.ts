@@ -21,6 +21,7 @@ export const NAV: NavItem[] = [
   { href: '/inbox', label: 'Inbox', icon: 'inbox', count: 'inbox', keywords: 'email replies gmail' },
   { href: '/outreach', label: 'Outreach', icon: 'outreach', count: 'drafts', keywords: 'contacts drafts linkedin email' },
   { href: '/interviews', label: 'Interviews', icon: 'interviews', count: 'interviews', keywords: 'prep calendar' },
+  { href: '/about', label: 'About me', icon: 'about', keywords: 'facts questions evidence documents upload skills experience profile' },
   { href: '/coach', label: 'Coach', icon: 'coach', keywords: 'ai chat assistant cv improve questions facts' },
   { href: '/analytics', label: 'Analytics', icon: 'analytics', keywords: 'stats funnel response rate spend' },
   { href: '/sources', label: 'Sources', icon: 'sources', keywords: 'watchlist companies boards discovery' },

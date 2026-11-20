@@ -1,11 +1,16 @@
 // LLM chat client. Server-only. Providers in order: OpenRouter free models, Gemini, Groq (if keyed), local Ollama.
 //
+// Paid tier (Kayzee's call, 2026-11-20): when ANTHROPIC_API_KEY is set, the apply-time purposes in
+// PREMIUM_PURPOSE_RE (CV, cover letter, form answers, field mapping) go to Claude first, inside hard daily and
+// total spend caps. Everything else (scoring, chat, coach, inbox, outreach) never touches the paid key.
+//
 // Every request sends reasoning:{enabled:false} (otherwise the model can return null content) and
 // every response's content is null-checked. With no provider available every call returns null so
 // callers fall back to their heuristics. Configured secrets are redacted from prompts before sending.
 
+import Anthropic from '@anthropic-ai/sdk';
 import { z, type ZodType } from 'zod';
-import { kvDelete, kvGet, kvSet, recordLLM } from './db';
+import { kvDelete, kvGet, kvSet, llmSpendUsd, recordLLM } from './db';
 import { env, hasLLM, localLLMEnabled, redactSecrets } from './env';
 import { log } from './log';
 
@@ -17,7 +22,7 @@ export const SYSTEM_GUARD =
 const JSON_INSTRUCTION = 'Respond with one valid JSON object only: no prose, no markdown, no code fences.';
 
 /** Tunables (tests shrink backoff). */
-export const LLM_TUNING = { timeoutMs: 60_000, localTimeoutMs: 180_000, localNumCtx: 8192, cooldownMs: 300_000, retries: 2, backoffMs: 1_000, maxBackoffMs: 30_000 };
+export const LLM_TUNING = { premiumTimeoutMs: 120_000, timeoutMs: 60_000, localTimeoutMs: 180_000, localNumCtx: 8192, cooldownMs: 300_000, retries: 2, backoffMs: 1_000, maxBackoffMs: 30_000 };
 
 export interface LLMCallOptions {
   purpose: string;               // recorded in llm_usage, e.g. 'score', 'cv.bullets'
@@ -242,6 +247,8 @@ function markOpenRouterCapped(): void {
 /** Test hook: forget the daily-cap and cooldown state. */
 export function resetLLMState(): void {
   memCapUntil = 0;
+  premiumCooldownUntil = 0;
+  premiumCapLoggedAt = 0;
   cooldownUntil.clear();
   try {
     kvDelete(CAP_KEY);
@@ -259,6 +266,106 @@ function skipReason(provider: LLMProvider): string | null {
   return until > Date.now() ? 'cooling down after rate limit' : null;
 }
 
+// ── Paid tier: Claude, apply-time only ──
+
+/** The only purposes allowed to spend money: what gets written and sent for one application. */
+export const PREMIUM_PURPOSE_RE = /^(cv\.|letter\.|answers\.|apply\.|telegram\.autoanswer)/;
+/** USD per million tokens (input, output). An unknown model is costed at the dearest rate so the cap errs low. */
+const CLAUDE_PRICES: Record<string, { in: number; out: number }> = {
+  'claude-fable-5-2': { in: 8, out: 40 },
+  'claude-opus-5-5': { in: 4, out: 20 },
+  'claude-sonnet-5-5': { in: 2, out: 10 },
+  'claude-haiku-5-5': { in: 0.1, out: 0.5 },
+};
+const PREMIUM_PREFIX = 'anthropic/';
+/** Yes/no gates run on the cheap model; the writing itself runs on the main one. */
+const FAST_PURPOSE_RE = /^apply\.fit$/;
+export function premiumModel(purpose: string): string {
+  return FAST_PURPOSE_RE.test(purpose) ? env.ANTHROPIC_FAST_MODEL : env.ANTHROPIC_MODEL;
+}
+const PREMIUM_LOCK_MS = 60 * 60_000;
+let premiumCooldownUntil = 0;
+let premiumCapLoggedAt = 0;
+
+export function claudeCostUsd(model: string, inputTokens: number, outputTokens: number): number {
+  const price = CLAUDE_PRICES[model] ?? CLAUDE_PRICES['claude-fable-5-2'];
+  return (inputTokens * price.in + outputTokens * price.out) / 1_000_000;
+}
+
+/** Paid spend so far: today (since 00:00 UTC) and in total. */
+export function premiumSpend(now = Date.now()): { todayUsd: number; totalUsd: number } {
+  const d = new Date(now);
+  const dayStart = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())).toISOString();
+  try {
+    return { todayUsd: llmSpendUsd(PREMIUM_PREFIX, dayStart), totalUsd: llmSpendUsd(PREMIUM_PREFIX) };
+  } catch {
+    return { todayUsd: Infinity, totalUsd: Infinity }; // can't read the ledger: don't spend
+  }
+}
+
+/** Why the paid tier is not used for this call, or null when it may run. */
+export function premiumSkipReason(purpose: string): string | null {
+  if (!env.ANTHROPIC_API_KEY) return 'no key';
+  if (!PREMIUM_PURPOSE_RE.test(purpose)) return 'not an apply-time purpose';
+  if (premiumCooldownUntil > Date.now()) return 'cooling down';
+  const spend = premiumSpend();
+  const capped = spend.totalUsd >= env.LLM_PREMIUM_TOTAL_USD ? `total cap $${env.LLM_PREMIUM_TOTAL_USD}`
+    : spend.todayUsd >= env.LLM_PREMIUM_DAILY_USD ? `daily cap $${env.LLM_PREMIUM_DAILY_USD}` : null;
+  if (capped && Date.now() - premiumCapLoggedAt > PREMIUM_LOCK_MS) {
+    premiumCapLoggedAt = Date.now();
+    log.warn('llm', `Claude spend reached the ${capped}: using the free models`, { todayUsd: spend.todayUsd, totalUsd: spend.totalUsd });
+  }
+  return capped;
+}
+
+/** Claude via the official SDK. Thinking is adaptive (always on for Opus 5.5); effort keeps short jobs cheap. */
+async function chatClaude(messages: ChatMessage[], opts: Params, purpose: string): Promise<ChatOutcome> {
+  const empty = { content: null, promptTokens: 0, completionTokens: 0 };
+  const model = premiumModel(purpose);
+  const client = new Anthropic({
+    apiKey: env.ANTHROPIC_API_KEY,
+    timeout: LLM_TUNING.premiumTimeoutMs,
+    maxRetries: LLM_TUNING.retries,
+    fetch: (url, init) => globalThis.fetch(url, init),
+  });
+  const system = messages.filter((m) => m.role === 'system').map((m) => m.content).join('\n\n');
+  const turns = messages.filter((m): m is ChatMessage & { role: 'user' | 'assistant' } => m.role !== 'system');
+  try {
+    const res = await client.messages.create({
+      model,
+      // Thinking shares this budget with the answer, so leave it room. Billing is on tokens used, not on the cap.
+      max_tokens: opts.maxTokens + 6000,
+      system,
+      messages: turns.map((m) => ({ role: m.role, content: m.content })),
+      output_config: { effort: /^letter\./.test(purpose) ? 'medium' : 'low' },
+    });
+    const usage = {
+      promptTokens: res.usage.input_tokens,
+      completionTokens: res.usage.output_tokens,
+      costUsd: claudeCostUsd(res.model in CLAUDE_PRICES ? res.model : model, res.usage.input_tokens, res.usage.output_tokens),
+    };
+    if (res.stop_reason === 'refusal') return { content: null, ...usage, error: `declined (${res.stop_details?.category ?? 'no category'})` };
+    const text = res.content.map((b) => (b.type === 'text' ? b.text : '')).join('').trim();
+    if (!text) return { content: null, ...usage, error: `empty content (stop_reason: ${res.stop_reason ?? 'none'})` };
+    return { content: text, ...usage };
+  } catch (err) {
+    if (err instanceof Anthropic.AuthenticationError || err instanceof Anthropic.PermissionDeniedError) {
+      premiumCooldownUntil = Date.now() + PREMIUM_LOCK_MS;
+      return { ...empty, error: `HTTP ${err.status}: key rejected` };
+    }
+    if (err instanceof Anthropic.RateLimitError) {
+      premiumCooldownUntil = Date.now() + LLM_TUNING.cooldownMs;
+      return { ...empty, rateLimited: true, error: 'HTTP 429' };
+    }
+    if (err instanceof Anthropic.APIError) {
+      // Out of credit comes back as a 400: no point retrying every call until he tops up.
+      if (/credit balance/i.test(err.message)) premiumCooldownUntil = Date.now() + PREMIUM_LOCK_MS;
+      return { ...empty, error: `HTTP ${err.status ?? '?'}: ${err.message.slice(0, 200)}` };
+    }
+    return { ...empty, error: `network error: ${(err as Error).message}` };
+  }
+}
+
 // ── Local queue: one Ollama request at a time so parallel callers don't thrash RAM ──
 
 let localTail: Promise<unknown> = Promise.resolve();
@@ -270,8 +377,17 @@ function withLocalLock<T>(fn: () => Promise<T>): Promise<T> {
 
 interface Params { json: boolean; maxTokens: number; temperature: number }
 
-async function chat(messages: ChatMessage[], opts: Params): Promise<ChatOutcome> {
+async function chat(messages: ChatMessage[], opts: Params, purpose: string): Promise<ChatOutcome> {
   let last: ChatOutcome = { content: null, promptTokens: 0, completionTokens: 0, error: 'no LLM provider available' };
+  if (!premiumSkipReason(purpose)) {
+    const label = `${PREMIUM_PREFIX}${premiumModel(purpose)}`;
+    const outcome = await chatClaude(messages, opts, purpose);
+    if (outcome.content !== null) return { ...outcome, model: label };
+    last = { ...outcome, error: `${label}: ${outcome.error ?? 'no content'}` };
+    log.warn('llm', `${purpose}: Claude gave no answer, trying the free models`, { error: outcome.error });
+    // A declined or empty reply is still billed: keep it in the ledger so the caps stay honest.
+    if (outcome.costUsd) record(`${purpose}:premium-miss`, { ...outcome, model: label }, false);
+  }
   for (const group of providerGroups()) {
     const skip = skipReason(group.provider);
     if (skip) {
@@ -462,7 +578,7 @@ export async function llmText(opts: LLMCallOptions): Promise<string | null> {
     json: false,
     maxTokens: opts.maxTokens ?? 1500,
     temperature: opts.temperature ?? 0.5,
-  });
+  }, opts.purpose);
   record(opts.purpose, outcome, outcome.content !== null);
   if (outcome.content === null) {
     log.warn('llm', `${opts.purpose} failed`, { error: outcome.error });
@@ -480,7 +596,7 @@ export async function llmJSON<T>(opts: LLMJsonOptions<T>): Promise<T | null> {
   const params = { json: true, maxTokens: opts.maxTokens ?? 2000, temperature: opts.temperature ?? 0.2 };
   const messages = baseMessages(opts, true);
 
-  const first = await chat(messages, params);
+  const first = await chat(messages, params, opts.purpose);
   if (first.content === null) {
     record(opts.purpose, first, false);
     log.warn('llm', `${opts.purpose} failed`, { error: first.error });
@@ -501,6 +617,7 @@ export async function llmJSON<T>(opts: LLMJsonOptions<T>): Promise<T | null> {
       },
     ],
     params,
+    opts.purpose,
   );
   if (repair.content === null) {
     record(repairPurpose, repair, false);

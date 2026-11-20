@@ -1,9 +1,10 @@
 // One-tap handoff session (Kayzee, Nov 2026): applications that Pursuit filled but that stopped at a human check
 // (CAPTCHA, "verify you are human", a submit it couldn't confirm) are finished by him in ~10 s each.
 //
-// Flow: Pursuit sends ONE Telegram nudge ("N applications only need you to tick the box, reply GO"). When he replies
-// GO, the worker opens the first one in a visible Chrome window, fully filled, and watches it. He ticks the box and
-// presses Submit; Pursuit sees the confirmation, saves the proof screenshot, marks it applied, texts "Applied ✓" and
+// Flow: Pursuit sends ONE Telegram nudge a day ("N applications only need you to tick the box, reply GO"). When he
+// replies GO, the worker opens the first one in a visible Chrome window and watches it. He clears the human check;
+// Pursuit fills the form (also when the check only showed up after "Apply") and, in hands-free mode, presses Submit.
+// Pursuit sees the confirmation, saves the proof screenshot, marks it applied, texts "Applied ✓" and
 // opens the next. Two in a row without a confirmation ends the session. Pursuit never touches the check itself.
 
 import { getJob, getSettings, kvGet, kvSet, listJobs } from '@/lib/db';
@@ -13,7 +14,7 @@ import type { Job } from '@/lib/types';
 export const HANDOFF_SESSION_KEY = 'handoff.session';
 export const HANDOFF_NUDGE_KEY = 'handoff.lastNudge';
 export const HANDOFF_WATCH_MS = 10 * 60_000;
-const NUDGE_EVERY_MS = 6 * 3_600_000;
+const NUDGE_EVERY_MS = 20 * 3_600_000; // one batch a day, not a drip of reminders
 const MAX_MISSES = 2;
 
 /** Needs that a person can clear in seconds in the open window. Account walls and missing answers are not these. */
@@ -48,7 +49,7 @@ export function startHandoffSession(now: Date = new Date()): string {
   if (getSettings().paused) return 'Pursuit is paused. Send /resume first, then GO.';
   const existing = handoffSession();
   save({ active: true, startedAt: existing?.startedAt ?? now.toISOString(), tried: [], applied: existing?.applied ?? [], misses: 0 });
-  return `Opening ${name(queue[0])} in Chrome on your Mac now (${queue.length} waiting). Tick the "I'm human" box and press Submit; I'll spot the confirmation and open the next one. Reply STOP to end.`;
+  return `Opening ${name(queue[0])} in Chrome on your Mac now (${queue.length} waiting). Clear the "I'm human" check when it shows. I fill the form and press Submit, then open the next one. If a form is left waiting, press Submit yourself. Reply STOP to end.`;
 }
 
 export function stopHandoffSession(): string {
@@ -100,7 +101,7 @@ export async function handoffStep(deps: HandoffDeps): Promise<Record<string, unk
   return { active: true, missed: next.id };
 }
 
-/** One nudge per 6 h when something waits on a human check and no session is running. */
+/** One nudge a day when something waits on a human check and no session is running. */
 export function handoffNudge(now: Date, quiet: boolean): string | null {
   if (quiet || handoffSession()) return null;
   const n = humanCheckQueue().length;

@@ -72,6 +72,7 @@ describe('request shape', () => {
     process.env.GEMINI_API_KEY = '';
     process.env.GROQ_API_KEY = '';
     process.env.ORCAROUTER_API_KEY = '';
+    process.env.ANTHROPIC_API_KEY = '';
     mockFetch();
     assert.equal(await llm.llmJSON({ ...base, schema: Schema }), null);
     assert.equal(await llm.llmText(base), null);

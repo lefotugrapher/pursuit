@@ -129,9 +129,9 @@ describe('scheduler due-ness', () => {
   test('interval tasks respect their interval (with a few seconds of slack)', () => {
     const now = NOON();
     const at = (msAgo: number) => scheduler.checkDue('score', ctx({ now, lastRuns: { score: ago(now, msAgo) } })).due;
-    assert.equal(at(60_000), false);
-    assert.equal(at(2 * MIN - 3_000), true);
-    assert.equal(at(2 * MIN), true);
+    assert.equal(at(10_000), false);
+    assert.equal(at(30_000 - 3_000), true);
+    assert.equal(at(30_000), true);
     const applyDue = (msAgo: number) => scheduler.checkDue('apply', ctx({ now, lastRuns: { apply: ago(now, msAgo) } })).due;
     assert.equal(applyDue(30_000), false);
     assert.equal(applyDue(MIN), true);
@@ -173,13 +173,13 @@ describe('scheduler due-ness', () => {
     for (const t of ['score', 'tailor', 'discover', 'inbox', 'outreach', 'followups'] as TaskName[]) assert.ok(due.includes(t), `${t} should run`);
   });
 
-  test('autopilot every 15 min only when mode=autopilot and enabled, never in quiet hours', () => {
+  test('autopilot every minute only when mode=autopilot and enabled, never in quiet hours', () => {
     const on = settings({ mode: 'autopilot', autopilot: { ...DEFAULT_SETTINGS.autopilot, enabled: true } });
     assert.equal(scheduler.checkDue('autopilot', ctx({ settings: on })).due, true);
     assert.equal(scheduler.checkDue('autopilot', ctx({ settings: { ...on, mode: 'review' } })).due, false);
     assert.equal(scheduler.checkDue('autopilot', ctx({ settings: on, now: dublinAt('23:00') })).due, false);
     const now = NOON();
-    assert.equal(scheduler.checkDue('autopilot', ctx({ settings: on, now, lastRuns: { autopilot: ago(now, 10 * MIN) } })).due, false);
+    assert.equal(scheduler.checkDue('autopilot', ctx({ settings: on, now, lastRuns: { autopilot: ago(now, 20_000) } })).due, false);
   });
 
   test('tick starts due tasks, skips in-flight ones, writes a heartbeat, and stop aborts waits', async () => {
@@ -549,6 +549,70 @@ describe('autopilot gate (SPEC §7)', () => {
 
 // ───────────────────────────── Pipeline stages ─────────────────────────────
 
+describe('unattendedRank', () => {
+  test('sites that submit with no human check go first, links that cannot be submitted last', () => {
+    const rank = (ats: string, applyUrl = 'https://example.test/job') => pipeline.unattendedRank({ ats, applyUrl, url: applyUrl } as never);
+    assert.equal(rank('greenhouse'), 0);
+    assert.equal(rank('ashby'), 0);
+    assert.equal(rank('lever'), 1);
+    assert.equal(rank('smartrecruiters'), 2);
+    assert.equal(rank('workable'), 2);
+    assert.equal(rank('linkedin'), 3);
+    assert.equal(rank('greenhouse', 'https://www.linkedin.com/jobs/view/1'), 3);
+    // An employer's own careers page with no named system is submittable by the universal filler: not "stuck".
+    assert.equal(rank('unknown', 'https://careers.example.test/jobs/1'), 1);
+    assert.equal(rank('unknown', ''), 3);
+  });
+});
+
+describe('posting age limit', () => {
+  test('a posting older than 30 days is skipped before scoring, tailoring or applying; no posted date is not a reason', async () => {
+    const old = new Date(NOON().getTime() - 45 * 86_400_000).toISOString();
+    const recent = new Date(NOON().getTime() - 5 * 86_400_000).toISOString();
+    assert.equal(pipeline.postingAgeDays({ postedAt: old }, NOON()), 45);
+    assert.equal(pipeline.postingAgeDays({}, NOON()), null);
+
+    const oldNew = insertJob('discovered', { postedAt: old });
+    const freshNew = insertJob('discovered', { postedAt: recent });
+    const undated = insertJob('discovered');
+    let scoredCalls = 0;
+    await pipeline.scorePending(10, fakeDeps({
+      hardFilters: () => ({ pass: true, rejected: [], flags: [] }),
+      scoreJob: async () => (scoredCalls++, { total: 80, components: { skills: 1, roleFit: 1, seniority: 1, location: 1, freshness: 1, salary: 1 }, reasons: [], flags: [], llmUsed: false, scoredAt: '' }),
+    }));
+    assert.equal(scoredCalls, 2, 'the old posting never reaches the scorer');
+    assert.equal(dbm.getJob(oldNew.id)?.status, 'skipped');
+    assert.equal(dbm.getJob(freshNew.id)?.status, 'scored');
+    assert.equal(dbm.getJob(undated.id)?.status, 'scored');
+    const [ev] = dbm.listEvents({ jobId: oldNew.id, type: 'status' });
+    assert.match(String((ev.detail?.detail as Record<string, unknown>).reason), /Posted 45 days ago: older than the 30-day limit/);
+
+    const oldScored = insertJob('scored', { postedAt: old }, { score: 90 });
+    const oldApproved = insertJob('approved', { postedAt: old });
+    const tailor = await pipeline.tailorPending(5, fakeDeps({ tailorCv: async () => { throw new Error('must not tailor'); }, fitCheck: async () => ({ apply: false, fit: 0, reason: 'test: stop here' }) }));
+    assert.equal(dbm.getJob(oldScored.id)?.status, 'skipped');
+    assert.equal(tailor.considered, 0);
+    await pipeline.processApproved(fakeDeps({ applyToJob: async () => { throw new Error('must not apply'); } }));
+    assert.equal(dbm.getJob(oldApproved.id)?.status, 'skipped');
+  });
+});
+
+describe('freshFirst', () => {
+  test('unattended sites, then the newest posting day, then score', () => {
+    const j = (id: string, ats: string, postedAt: string, score: number) => ({ id, ats, applyUrl: 'https://example.test/j', url: 'https://example.test/j', postedAt, discoveredAt: '2026-11-01T00:00:00Z', score });
+    const order = pipeline.freshFirst([
+      j('old-top', 'greenhouse', '2026-11-10T09:00:00Z', 95),
+      j('today-low', 'greenhouse', '2026-11-20T08:00:00Z', 62),
+      j('today-high', 'ashby', '2026-11-20T07:00:00Z', 80),
+      j('today-check', 'smartrecruiters', '2026-11-20T10:00:00Z', 99),
+      j('today-linkedin', 'linkedin', '2026-11-20T11:00:00Z', 99),
+    ] as never).map((x) => (x as unknown as { id: string }).id);
+    assert.deepEqual(order, ['today-high', 'today-low', 'old-top', 'today-check', 'today-linkedin']);
+    // No posted date: falls back to when Pursuit first saw it.
+    assert.equal(pipeline.freshness({ discoveredAt: '2026-11-20T00:00:00Z' } as never), Date.parse('2026-11-20T00:00:00Z'));
+  });
+});
+
 describe('scorePending', () => {
   test('filters, scores, auto-skips below threshold, leaves demo jobs alone', async () => {
     const reject = insertJob('discovered', { title: 'Head of PR' });
@@ -574,6 +638,22 @@ describe('scorePending', () => {
     assert.equal(dbm.getJob(demo.id)?.status, 'discovered');
   });
 
+  test('a job outside his line of work is skipped whatever its total', async () => {
+    const off = insertJob('discovered', { title: 'Graduate Programme, Accountancy' });
+    const on = insertJob('discovered', { title: 'PR Executive' });
+    const stats = await pipeline.scorePending(10, fakeDeps({
+      hardFilters: () => ({ pass: true, rejected: [], flags: [] }),
+      scoreJob: async (job) => ({ total: 72, components: { skills: 1, roleFit: job.title.includes('Accountancy') ? 0.09 : 0.5, seniority: 1, location: 1, freshness: 1, salary: 1 }, reasons: [], flags: [], llmUsed: false, scoredAt: '' }),
+    }));
+    assert.equal(stats.skipped, 1);
+    assert.equal(stats.scored, 1);
+    assert.equal(dbm.getJob(off.id)?.status, 'skipped');
+    assert.equal(dbm.getJob(off.id)?.score, 72);
+    const [ev] = dbm.listEvents({ jobId: off.id, type: 'status' });
+    assert.match(String((ev.detail?.detail as Record<string, unknown>).reason), /Role fit 9% is below 50%/);
+    assert.equal(dbm.getJob(on.id)?.status, 'scored');
+  });
+
   test('a job that keeps failing to score is parked as failed after 3 attempts', async () => {
     const job = insertJob('discovered');
     const deps = fakeDeps({ hardFilters: () => { throw new Error('bad JD'); } });
@@ -594,6 +674,28 @@ describe('tailorPending', () => {
     ats: pdfPath ? { score: 90 } as never : null, compileLog: pdfPath ? undefined : 'error: missing }',
   });
   const letter = async () => ({ text: 'Letter', guard: { ok: true, problems: [] }, slop: { ok: true, hits: [] } });
+
+  test('the fit check skips an off-target job before any CV is written; a failing check goes by the score', async () => {
+    dbm.updateSettings({ minScore: 60 });
+    const off = insertJob('scored', { title: 'IT Labs Graduate Programme' }, { score: 90 });
+    const on = insertJob('scored', { title: 'PR Executive' }, { score: 80 });
+    const flaky = insertJob('scored', { title: 'Content Executive' }, { score: 70 });
+    const tailored: string[] = [];
+    const stats = await pipeline.tailorPending(5, fakeDeps({
+      fitCheck: async (job) => {
+        if (job.id === flaky.id) throw new Error('model down');
+        return job.id === off.id ? { apply: false, fit: 0.1, reason: 'This is a software engineering programme.' } : { apply: true, fit: 0.9, reason: 'Same function.' };
+      },
+      tailorCv: async (job) => (tailored.push(job.id), cv(`/tmp/${job.id}.pdf`)),
+      writeCoverLetter: letter,
+    }));
+    assert.deepEqual(tailored, [on.id, flaky.id]);
+    assert.equal(stats.offTarget, 1);
+    assert.equal(stats.ready, 2);
+    assert.equal(dbm.getJob(off.id)?.status, 'skipped');
+    const [ev] = dbm.listEvents({ jobId: off.id, type: 'status' });
+    assert.match(String((ev.detail?.detail as Record<string, unknown>).reason), /^Fit check: This is a software engineering programme/);
+  });
 
   test('best-scored first, writes artifacts, marks ready, notifies once', async () => {
     dbm.updateSettings({ minScore: 60 });
@@ -665,9 +767,9 @@ describe('tailorPending', () => {
 });
 
 describe('processApproved', () => {
-  test('applies oldest first with 20-60 s jitter between, never before the first', async () => {
+  test('applies newest first with 20-60 s jitter between, never before the first', async () => {
     const a = insertJob('approved');
-    await new Promise((r) => setTimeout(r, 5)); // distinct updatedAt so "oldest first" is deterministic
+    await new Promise((r) => setTimeout(r, 5)); // distinct discoveredAt so "newest first" is deterministic
     const b = insertJob('approved');
     const calls: string[] = [];
     const sleeps: number[] = [];
@@ -681,7 +783,7 @@ describe('processApproved', () => {
         return { status: 'applied' };
       },
     }));
-    assert.deepEqual(calls, [a.id, b.id]);
+    assert.deepEqual(calls, [b.id, a.id]);
     assert.deepEqual(sleeps, [30_000]);
     assert.equal(stats.applied, 2);
   });

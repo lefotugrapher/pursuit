@@ -31,6 +31,29 @@ export const DEFAULT_BATCH = 5;
 export const MAX_STAGE_FAILURES = 3;
 export const APPLY_JITTER_MS = { min: 20_000, max: 60_000 } as const;
 export const AUTOPILOT_MIN_ATS_SCORE = 80;
+/**
+ * Role-fit floor (0-1). Role fit is only a quarter of the total, so a posting stuffed with familiar keywords could
+ * reach the apply threshold while being a different job altogether (an accountancy graduate programme scored 64).
+ * Below this, a job is skipped whatever its total.
+ */
+export const MIN_ROLE_FIT = 0.5;
+/**
+ * A posting older than this is not scored, tailored or applied to (Kayzee, 2026-11-20, after a CV was written for a
+ * July posting): some boards keep "evergreen" listings open for months, and those are a poor use of paid credits.
+ * Only a posted date from the board counts; a job with none is judged on everything else.
+ */
+export const MAX_POSTING_AGE_DAYS = 30;
+
+/** Whole days since the board says the job was posted, or null when it doesn't say. */
+export function postingAgeDays(job: Pick<Job, 'postedAt'>, now: Date = new Date()): number | null {
+  const t = Date.parse(job.postedAt ?? '');
+  return Number.isFinite(t) ? Math.floor((now.getTime() - t) / 86_400_000) : null;
+}
+
+function tooOldReason(job: Pick<Job, 'postedAt'>, now: Date): string | null {
+  const age = postingAgeDays(job, now);
+  return age !== null && age > MAX_POSTING_AGE_DAYS ? `Posted ${age} days ago: older than the ${MAX_POSTING_AGE_DAYS}-day limit` : null;
+}
 const DEMO_HEADROOM = 20;
 const DASHBOARD_URL = 'http://localhost:7020';
 const FAILURES_KEY = 'pipeline.failures';
@@ -118,10 +141,10 @@ export interface ScoreStats {
 export async function scorePending(limit = DEFAULT_BATCH, overrides?: Partial<PipelineDeps>): Promise<ScoreStats> {
   const deps = resolveDeps(overrides);
   const stats: ScoreStats = { considered: 0, scored: 0, skipped: 0, filteredOut: 0, failed: 0, errors: [] };
-  // Oldest first, but jobs Pursuit can submit itself go ahead of LinkedIn/Indeed links: the free AI quota is
-  // daily, so it should be spent where it can end in an application.
-  const pool = pickJobs({ status: 'discovered', orderBy: 'discoveredAt', dir: 'asc' }, 500);
-  const jobs = [...pool.filter((j) => !isUnresolved(j)), ...pool.filter((j) => isUnresolved(j))].slice(0, limit);
+  // Newest first, and jobs Pursuit can submit itself go ahead of LinkedIn/Indeed links: the free AI quota is
+  // daily, so it should be spent where it can end in an application today.
+  const pool = pickJobs({ status: 'discovered', orderBy: 'discoveredAt', dir: 'desc' }, 500);
+  const jobs = freshFirst(pool).slice(0, limit);
   if (!jobs.length) return stats;
 
   const settings = getSettings();
@@ -155,6 +178,8 @@ async function scoreOne(job: Job, profile: Profile, facts: FactBank, settings: S
     const moved = transition(job.id, 'discovered', 'filtered_out', { reasons: filters.rejected }, { filters });
     return moved ? 'filtered_out' : 'gone';
   }
+  const stale = tooOldReason(job, deps.now());
+  if (stale) return transition(job.id, 'discovered', 'skipped', { reason: stale, auto: true }, { filters }) ? 'skipped' : 'gone';
 
   const keywords = await deps.extractKeywords(job.description || job.title);
   const kw = await deps.coverage(keywords, facts);
@@ -162,6 +187,11 @@ async function scoreOne(job: Job, profile: Profile, facts: FactBank, settings: S
   const total = clampScore(detail.total);
   const patch: Partial<Job> = { filters, keywords: kw, score: total, scoreDetail: { ...detail, total } };
 
+  const roleFit = detail.components?.roleFit;
+  if (typeof roleFit === 'number' && roleFit < MIN_ROLE_FIT) {
+    const reason = `Role fit ${Math.round(roleFit * 100)}% is below ${Math.round(MIN_ROLE_FIT * 100)}%: not close enough to your target roles`;
+    return transition(job.id, 'discovered', 'skipped', { reason, score: total, roleFit, auto: true }, patch) ? 'skipped' : 'gone';
+  }
   if (total < settings.autoSkipBelow) {
     const reason = `Score ${total} is below the auto-skip threshold of ${settings.autoSkipBelow}`;
     return transition(job.id, 'discovered', 'skipped', { reason, score: total, auto: true }, patch) ? 'skipped' : 'gone';
@@ -172,7 +202,7 @@ async function scoreOne(job: Job, profile: Profile, facts: FactBank, settings: S
 // ───────────────────────────── Tailoring ─────────────────────────────
 
 export interface TailorStats {
-  considered: number; ready: number; needsYou: number; failed: number; retried: number;
+  considered: number; ready: number; needsYou: number; failed: number; retried: number; offTarget: number;
   tailoredToday: number; cap: number; capped: boolean;
   errors: { jobId: string; error: string }[];
 }
@@ -192,7 +222,7 @@ export async function tailorPending(limit = DEFAULT_BATCH, overrides?: Partial<P
   const used = tailoredToday(deps.now());
   const remaining = Math.max(0, settings.dailyTailorCap - used);
   const stats: TailorStats = {
-    considered: 0, ready: 0, needsYou: 0, failed: 0, retried: 0,
+    considered: 0, ready: 0, needsYou: 0, failed: 0, retried: 0, offTarget: 0,
     tailoredToday: used, cap: settings.dailyTailorCap, capped: remaining === 0, errors: [],
   };
   if (remaining === 0) return stats;
@@ -201,8 +231,8 @@ export async function tailorPending(limit = DEFAULT_BATCH, overrides?: Partial<P
   // Hands-free: a letter for a LinkedIn/Indeed link Pursuit can't submit just burns the daily cap and the free AI
   // quota. Wait until the resolver has found the employer's own page.
   const jobs = settings.autopilot.handsFree
-    ? pickJobs({ status: 'scored', minScore: settings.minScore, orderBy: 'score', dir: 'desc' }, 500).filter((j) => !isUnresolved(j)).slice(0, take)
-    : pickJobs({ status: 'scored', minScore: settings.minScore, orderBy: 'score', dir: 'desc' }, take);
+    ? freshFirst(pickJobs({ status: 'scored', minScore: settings.minScore, orderBy: 'score', dir: 'desc' }, 500).filter((j) => !isUnresolved(j))).slice(0, take)
+    : freshFirst(pickJobs({ status: 'scored', minScore: settings.minScore, orderBy: 'score', dir: 'desc' }, 500)).slice(0, take);
   if (!jobs.length) return stats;
 
   const profile = deps.loadProfile();
@@ -211,6 +241,23 @@ export async function tailorPending(limit = DEFAULT_BATCH, overrides?: Partial<P
   const readyJobs: Job[] = [];
 
   for (const job of jobs) {
+    const stale = tooOldReason(job, deps.now());
+    if (stale) {
+      if (transition(job.id, 'scored', 'skipped', { reason: stale, auto: true })) stats.offTarget++;
+      continue;
+    }
+    // Cheap, strict yes/no before a CV and letter are written for it.
+    let verdict: Awaited<ReturnType<PipelineDeps['fitCheck']>> = null;
+    try {
+      // A job he starred himself is his call: the gate is there to stop Pursuit's guesses, not his picks.
+      verdict = job.starred ? null : await deps.fitCheck(job, profile, facts);
+    } catch (err) {
+      log.forJob('warn', job.id, 'pipeline', `fit check failed, going by the score: ${errMessage(err)}`);
+    }
+    if (verdict && !verdict.apply) {
+      if (transition(job.id, 'scored', 'skipped', { reason: `Fit check: ${verdict.reason}`, fit: verdict.fit, auto: true })) stats.offTarget++;
+      continue;
+    }
     if (!transition(job.id, 'scored', 'tailoring')) continue;
     stats.considered++;
     try {
@@ -329,12 +376,18 @@ function applyStopReason(signal?: AbortSignal): ApplyStats['stoppedBy'] | undefi
 export async function processApproved(overrides?: Partial<PipelineDeps>, signal?: AbortSignal): Promise<ApplyStats> {
   const deps = resolveDeps(overrides);
   const stats: ApplyStats = { attempted: 0, applied: 0, needsYou: 0, failed: 0, skipped: 0, outcomes: [] };
-  const queue = pickJobs({ status: 'approved', orderBy: 'updatedAt', dir: 'asc' }, 200);
+  const queue = freshFirst(pickJobs({ status: 'approved', orderBy: 'updatedAt', dir: 'asc' }, 200));
 
   for (const queued of queue) {
     stats.stoppedBy = applyStopReason(signal);
     if (stats.stoppedBy) break;
     if (getJob(queued.id)?.status !== 'approved') continue;
+    const stale = tooOldReason(queued, deps.now());
+    if (stale) {
+      transition(queued.id, 'approved', 'skipped', { reason: stale, auto: true });
+      stats.skipped++;
+      continue;
+    }
     // Still a LinkedIn/Indeed link: the resolver hasn't found the employer's page yet. Leave it approved for later,
     // without costing a browser run or the 20-60 s spacing.
     if (UNRESOLVED_ATS.has(queued.ats) || /linkedin\.com|indeed\.(com|ie)/i.test(queued.applyUrl ?? '')) {
@@ -442,8 +495,42 @@ function answerProblems(answered: AnsweredQuestion[], requireAll: boolean): stri
 const UNRESOLVED_ATS = new Set<string>(['linkedin', 'indeed']);
 const ACCOUNT_WALL_ATS = new Set<string>(['workday']);
 /** Still a LinkedIn/Indeed (or unknown board) link: Pursuit can't apply until the resolver finds the employer page. */
+/**
+ * How likely a job is to go all the way without Kayzee, best first. Greenhouse and Ashby forms submit with no human
+ * check; SmartRecruiters and Workable put one in front of every applicant; LinkedIn/Indeed links can't be submitted
+ * at all until the resolver finds the employer's page. Quota and the daily caps are spent in this order.
+ */
+export function unattendedRank(job: Pick<Job, 'ats' | 'applyUrl' | 'url'>): number {
+  if (isUnresolved(job as Job)) return 3;
+  if (job.ats === 'greenhouse' || job.ats === 'ashby') return 0;
+  if (job.ats === 'smartrecruiters' || job.ats === 'workable' || job.ats === 'workday') return 2;
+  return 1;
+}
+
+/** When the employer posted the job (or, when the board doesn't say, when Pursuit first saw it), as epoch ms. */
+export function freshness(job: Pick<Job, 'postedAt' | 'discoveredAt'>): number {
+  const t = Date.parse(job.postedAt ?? '') || Date.parse(job.discoveredAt ?? '');
+  return Number.isFinite(t) ? t : 0;
+}
+
+/**
+ * Work order for every stage (Kayzee, 2026-11-20: "the second it scrapes it, apply"): jobs Pursuit can finish alone
+ * first, then the newest posting day, then the best score, then the newest posting. Early applicants get read; a
+ * week-old posting can wait behind today's.
+ */
+export function freshFirst<T extends Pick<Job, 'ats' | 'applyUrl' | 'url' | 'postedAt' | 'discoveredAt' | 'score'>>(jobs: T[]): T[] {
+  const DAY = 86_400_000;
+  return jobs
+    .map((job) => ({ job, rank: unattendedRank(job), at: freshness(job) }))
+    .sort((a, b) => a.rank - b.rank || Math.floor(b.at / DAY) - Math.floor(a.at / DAY) || (b.job.score ?? 0) - (a.job.score ?? 0) || b.at - a.at)
+    .map((x) => x.job);
+}
+
 function isUnresolved(job: Job): boolean {
-  return UNRESOLVED_ATS.has(job.ats) || job.ats === 'unknown' || /linkedin\.com|indeed\.(com|ie)/i.test(job.applyUrl ?? '');
+  if (UNRESOLVED_ATS.has(job.ats) || /linkedin\.com|indeed\.(com|ie)/i.test(job.applyUrl ?? '')) return true;
+  // "unknown" only means no named adapter. When the apply link is the employer's own page (the resolver found it),
+  // the universal filler can try it, so the job is NOT stuck waiting.
+  return job.ats === 'unknown' && !/^https?:\/\//i.test(job.applyUrl ?? '');
 }
 /** Flags that still stop hands-free (the rest are informational or already hard filters). */
 const HANDSFREE_DEALBREAKERS: RegExp[] = [

@@ -11,6 +11,7 @@ process.env.OPENROUTER_API_KEY = '';
 process.env.GEMINI_API_KEY = '';
 process.env.GROQ_API_KEY = '';
 process.env.ORCAROUTER_API_KEY = '';
+process.env.ANTHROPIC_API_KEY = '';
 fs.mkdirSync(process.env.PURSUIT_CONFIG_DIR, { recursive: true });
 for (const f of ['facts', 'profile', 'answers', 'sources']) {
   fs.copyFileSync(path.join(import.meta.dirname, '..', 'config', `${f}.example.json`), path.join(process.env.PURSUIT_CONFIG_DIR, `${f}.example.json`));

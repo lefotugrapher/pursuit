@@ -7,6 +7,7 @@
 
 import { loadAnswers, loadFacts, loadProfile } from '@/lib/config';
 import { listContacts } from '@/lib/db';
+import type { FitVerdict } from '@/engine/score';
 import type {
   AnsweredQuestion, AnswerBank, ApplyOutcome, Contact, FactBank, FilterResult, GuardResult, Job, Keyword,
   KeywordCoverage, Message, NewContact, NewMessage, Profile, ScoreDetail, ScreeningQuestion, TailoredCv,
@@ -40,6 +41,8 @@ export interface PipelineDeps {
   extractKeywords(jd: string): MaybePromise<Keyword[]>;
   coverage(keywords: Keyword[], facts: FactBank): MaybePromise<KeywordCoverage>;
   scoreJob(job: Job, profile: Profile, facts: FactBank): Promise<ScoreDetail>;
+  /** Strict second opinion before tailoring: is this job really in his line of work? Null = no model, go by score. */
+  fitCheck(job: Job, profile: Profile, facts: FactBank): Promise<FitVerdict | null>;
   tailorCv(job: Job, facts: FactBank, profile: Profile, kw: KeywordCoverage): Promise<TailoredCv>;
   writeCoverLetter(job: Job, facts: FactBank, profile: Profile, kw?: KeywordCoverage): Promise<CoverLetterResult>;
   answerQuestions(questions: ScreeningQuestion[], answers: AnswerBank, profile: Profile, facts: FactBank, job: Job): Promise<AnsweredQuestion[]>;
@@ -100,6 +103,7 @@ export const defaultDeps: PipelineDeps = {
   extractKeywords: async (jd) => (await import('@/engine/keywords')).extractKeywords(jd),
   coverage: async (keywords, facts) => (await import('@/engine/keywords')).coverage(keywords, facts),
   scoreJob: async (job, profile, facts) => (await import('@/engine/score')).scoreJob(job, profile, facts),
+  fitCheck: async (job, profile, facts) => (await import('@/engine/score')).fitCheck(job, profile, facts),
   tailorCv: async (job, facts, profile, kw) => (await import('@/engine/tailor/cv')).tailorCv(job, facts, profile, kw),
   writeCoverLetter: async (job, facts, profile, kw) =>
     (await import('@/engine/tailor/letter')).writeCoverLetter(job, facts, profile, kw ? { coverage: kw } : {}),

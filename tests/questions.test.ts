@@ -28,6 +28,7 @@ process.env.OPENROUTER_API_KEY = '';
 process.env.GEMINI_API_KEY = '';
 process.env.GROQ_API_KEY = '';
 process.env.ORCAROUTER_API_KEY = '';
+process.env.ANTHROPIC_API_KEY = '';
 process.env.TELEGRAM_BOT_TOKEN = '';
 process.env.TELEGRAM_CHAT_ID = '';
 globalThis.fetch = (async () => {

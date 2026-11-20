@@ -62,8 +62,15 @@ export const DEFAULT_LLM_MODELS = 'google/gemma-4-31b-it:free,nvidia/nemotron-3.
 export const DEFAULT_GEMINI_MODEL = 'gemini-2.5-flash';
 export const DEFAULT_GROQ_MODEL = 'llama-3.3-70b-versatile';
 export const DEFAULT_ORCAROUTER_MODELS = ['deepseek/deepseek-v4.1-flash-free', 'z-ai/glm-5.3-flash-free', 'deepseek/deepseek-v4-flash-free', 'tencent/hy4-preview-free'];
+export const DEFAULT_ANTHROPIC_MODEL = 'claude-opus-5-5';
+export const DEFAULT_ANTHROPIC_FAST_MODEL = 'claude-haiku-5-5';
 export const DEFAULT_OLLAMA_URL = 'http://localhost:11434';
 export const DEFAULT_OLLAMA_MODEL = 'qwen3-14b-abl:latest';
+
+function usd(raw: string | undefined, fallback: number): number {
+  const n = Number(raw);
+  return raw !== undefined && Number.isFinite(n) && n >= 0 ? n : fallback;
+}
 
 /** Live view of the environment (getters re-read process.env, so tests can toggle keys). */
 export const env = {
@@ -80,6 +87,14 @@ export const env = {
     return list.length ? list : DEFAULT_ORCAROUTER_MODELS;
   },
   get GROQ_MODEL() { return read('GROQ_MODEL') ?? DEFAULT_GROQ_MODEL; },
+  /** Paid Claude key. Used ONLY for apply-time writing (see PREMIUM_PURPOSE_RE in llm.ts), inside the caps below. */
+  get ANTHROPIC_API_KEY() { return read('ANTHROPIC_API_KEY'); },
+  get ANTHROPIC_MODEL() { return read('ANTHROPIC_MODEL') ?? DEFAULT_ANTHROPIC_MODEL; },
+  /** Cheap Claude for yes/no gates (the fit check before tailoring). */
+  get ANTHROPIC_FAST_MODEL() { return read('ANTHROPIC_FAST_MODEL') ?? DEFAULT_ANTHROPIC_FAST_MODEL; },
+  /** Hard spend caps for the paid tier, in USD. Past either one, calls go back to the free chain. */
+  get LLM_PREMIUM_DAILY_USD(): number { return usd(read('LLM_PREMIUM_DAILY_USD'), 3); },
+  get LLM_PREMIUM_TOTAL_USD(): number { return usd(read('LLM_PREMIUM_TOTAL_USD'), 90); },
   get OLLAMA_URL() { return (read('OLLAMA_URL') ?? DEFAULT_OLLAMA_URL).replace(/\/+$/, ''); },
   get OLLAMA_MODEL() { return read('OLLAMA_MODEL') ?? DEFAULT_OLLAMA_MODEL; },
   /** '1' = always use local Ollama, '0' = never, undefined = auto (on when Ollama answers /api/tags). */
@@ -132,7 +147,7 @@ export function localLLMEnabled(): boolean {
 }
 
 export function hasLLM(): boolean {
-  return Boolean(env.OPENROUTER_API_KEY || env.GEMINI_API_KEY || env.GROQ_API_KEY || env.ORCAROUTER_API_KEY) || localLLMEnabled();
+  return Boolean(env.OPENROUTER_API_KEY || env.GEMINI_API_KEY || env.GROQ_API_KEY || env.ORCAROUTER_API_KEY || env.ANTHROPIC_API_KEY) || localLLMEnabled();
 }
 
 export function hasMail(): boolean {
@@ -151,6 +166,7 @@ const ENV_META: { key: EnvKey; purpose: string; optional: boolean }[] = [
   { key: 'GEMINI_API_KEY', purpose: 'Free Gemini fallback when OpenRouter hits its daily cap', optional: true },
   { key: 'GROQ_API_KEY', purpose: 'Free Groq fallback when OpenRouter hits its daily cap', optional: true },
   { key: 'ORCAROUTER_API_KEY', purpose: 'OrcaRouter free models (-free only) when OpenRouter hits its daily cap', optional: true },
+  { key: 'ANTHROPIC_API_KEY', purpose: 'Paid Claude, apply-time writing only (CV, cover letter, form answers), inside the daily/total spend caps', optional: true },
   { key: 'GMAIL_USER', purpose: 'Inbox watching + sending approved email', optional: true },
   { key: 'GMAIL_APP_PASSWORD', purpose: 'Gmail app password for IMAP/SMTP', optional: true },
   { key: 'ADZUNA_APP_ID', purpose: 'Adzuna discovery source', optional: true },
@@ -166,7 +182,7 @@ export function envStatus(): EnvKeyStatus[] {
   return ENV_META.map((m) => ({ ...m, set: m.key === 'LLM_MODEL' ? Boolean(read('LLM_MODEL')) : Boolean(env[m.key]) }));
 }
 
-const SECRET_KEYS: EnvKey[] = ['OPENROUTER_API_KEY', 'GEMINI_API_KEY', 'GROQ_API_KEY', 'ORCAROUTER_API_KEY', 'GMAIL_APP_PASSWORD', 'ADZUNA_APP_KEY', 'NTFY_TOPIC', 'TELEGRAM_BOT_TOKEN'];
+const SECRET_KEYS: EnvKey[] = ['OPENROUTER_API_KEY', 'GEMINI_API_KEY', 'GROQ_API_KEY', 'ORCAROUTER_API_KEY', 'ANTHROPIC_API_KEY', 'GMAIL_APP_PASSWORD', 'ADZUNA_APP_KEY', 'NTFY_TOPIC', 'TELEGRAM_BOT_TOKEN'];
 
 function secretValues(): string[] {
   const values = new Set<string>();

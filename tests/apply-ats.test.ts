@@ -33,6 +33,7 @@ process.env.OPENROUTER_API_KEY = ''; // never a real LLM call from tests
 process.env.GEMINI_API_KEY = '';
 process.env.GROQ_API_KEY = '';
 process.env.ORCAROUTER_API_KEY = '';
+process.env.ANTHROPIC_API_KEY = '';
 
 fs.copyFileSync(path.join(REPO_CONFIG, 'profile.example.json'), path.join(CONFIG_DIR, 'profile.json'));
 const BANK: import('../src/lib/types').AnswerBank = {

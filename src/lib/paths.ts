@@ -57,6 +57,8 @@ export const ROOT = resolveRoot();
 export const DATA_DIR = envPath('PURSUIT_DATA_DIR') ?? path.join(ROOT, 'data');
 export const ARTIFACTS_DIR = path.join(DATA_DIR, 'artifacts');
 export const SCREENSHOTS_DIR = path.join(DATA_DIR, 'screenshots');
+/** Files Kayzee uploads on the About-me page as evidence. Inside data/, so never in git. */
+export const EVIDENCE_DIR = path.join(DATA_DIR, 'evidence');
 /**
  * Pursuit's own Chrome profile lives OUTSIDE the project folder: Chrome keeps lock links in it while running, and
  * the dashboard build (Turbopack) trips over them if the folder sits inside the project. Override with

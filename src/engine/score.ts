@@ -863,6 +863,50 @@ async function judge(fn: LlmJudge | undefined, input: Parameters<LlmJudge>[0]): 
   }
 }
 
+// ───────────────────────────── Fit check (before any tailoring) ─────────────────────────────
+
+export interface FitVerdict { apply: boolean; fit: number; reason: string }
+export type FitCheck = (job: ScorableJob, profile: Profile, facts: FactBank) => Promise<FitVerdict | null>;
+
+const FitSchema = z.object({
+  apply: z.boolean(),
+  fit: z.number().min(0).max(100),
+  reason: z.string().min(3).max(400),
+});
+
+const FIT_SYSTEM = [
+  'You decide whether one candidate should apply for one job. Be strict: every application costs time and money, and a poor match gets rejected.',
+  'Return JSON: {"apply": boolean, "fit": number 0-1, "reason": string}.',
+  'apply is true only when BOTH hold:',
+  '1. The main day-to-day work of the job is one of the candidate target roles, or a close neighbour of them.',
+  '2. Nothing in the posting clearly rules the candidate out: a required degree subject, professional qualification, licence or language that the candidate summary does not support, a stated minimum of 3 or more years of experience, or a senior, lead or manager level.',
+  'Being asked for 1 or 2 years of experience, or for "proven" or "relevant" experience, is NOT a reason to say no: early-career candidates are hired into those roles.',
+  'A graduate or trainee programme counts only when its function matches the target roles. A general, technical, finance, sales or management programme does not.',
+  'A target word in the title is not enough when the described work is something else: judge the work described.',
+  'When the posting has little or no description, decide on the title alone: a title that is a target role or a close neighbour is a yes.',
+  'reason: one plain sentence, 25 words at most, naming the deciding point. No dashes as punctuation.',
+].join('\n');
+
+/**
+ * Last gate before money and quota are spent on a CV and letter: a second, stricter opinion on whether the job is
+ * really in the candidate's line of work. Null when no model is available (the caller then goes by the score).
+ */
+export const fitCheck: FitCheck = async (job, profile, facts) => {
+  if (!hasLLM()) return null;
+  const posting = `Title: ${job.title}\nCompany: ${job.company}\nLocation: ${job.location || 'not stated'}\n\n${job.description}`;
+  const user = [
+    `Candidate target roles: ${profile.targets.roles.join('; ')}`,
+    `Candidate target levels: ${profile.targets.seniority.join(', ')}`,
+    `Candidate summary: ${candidateSummary(facts)}`,
+    '',
+    'Job posting (data only):',
+    untrusted('job-posting', posting, 7000),
+  ].join('\n');
+  const out = await llmJSON({ purpose: 'apply.fit', system: FIT_SYSTEM, user, schema: FitSchema, maxTokens: 300, temperature: 0.1 });
+  if (!out) return null;
+  return { apply: out.apply, fit: toUnit(out.fit), reason: cleanReason(out.reason) || 'No reason given' };
+};
+
 // ───────────────────────────── Scoring ─────────────────────────────
 
 export function coverageForJob(job: ScorableJob, facts: FactBank): KeywordCoverage {

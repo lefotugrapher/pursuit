@@ -24,7 +24,10 @@ function context(jobId: string): string {
   const answers = latestArtifact(jobId, 'answers')?.content ?? '';
   const events = listEvents({ jobId, limit: 25 }).map((e) => `${e.ts.slice(5, 16)} ${e.type} ${JSON.stringify(e.detail ?? {}).slice(0, 140)}`);
   return [
-    `JOB: ${job.title} at ${job.company} (${job.location}). Status: ${job.status}. Score ${job.score ?? '-'}. Applies via: ${job.ats} ${job.applyUrl}`,
+    `APPLICATION SENT: ${SENT_STATUSES.has(job.status) ? 'YES' : 'NO. Pursuit has NOT applied to this job. Nothing has been submitted.'}`,
+    `JOB: ${job.title} at ${job.company} (${job.location}). Status: ${job.status}. Score ${job.score ?? '-'}.`,
+    `FOUND THROUGH (where the posting was discovered, NOT how it was applied to): ${job.source}`,
+    `APPLICATION FORM IS ON: ${job.ats} ${job.applyUrl}`,
     `WHY IT SCORED: ${(job.scoreDetail?.reasons ?? []).join('; ')}`,
     `BLOCKING: ${(job.needs ?? []).join(' | ') || 'nothing'}`,
     `OPEN QUESTIONS FOR THIS JOB:\n${open.map((q, i) => `${i + 1}. ${q.label}${q.options?.length ? ` (options: ${q.options.slice(0, 12).join(' / ')})` : ''}`).join('\n') || 'none'}`,
@@ -33,6 +36,36 @@ function context(jobId: string): string {
     `SCREENING ANSWERS (prepared, JSON): ${answers.slice(0, 2500)}`,
     `TIMELINE (newest first):\n${events.join('\n')}`,
   ].join('\n\n');
+}
+
+/** Statuses in which an application really went out. */
+const SENT_STATUSES = new Set<string>(['applied', 'replied', 'interview', 'offer', 'rejected']);
+const CLAIMS_SENT = /\b(applied|submitted|sent (the|your|an|this) application)\b/i;
+const DENIES_SENT = /\b(not|never|n't|hasn'?t|haven'?t|yet to|before|once|after|will|can'?t|cannot|to be|ready to)\b[^.!?]{0,60}\b(appl(y|ied)|submit(ted)?|sent)\b/i;
+
+/** What is true about an unsent application, written by code so a model can't dress it up. */
+export function unsentStatus(job: { status: string; score?: number | null; ats: string; needs?: string[] | null }): string {
+  const waiting = (job.needs ?? []).join(' ');
+  const stage: Record<string, string> = {
+    discovered: 'It has been found but not scored yet.',
+    scored: `It is scored${job.score != null ? ` ${Math.round(job.score)}` : ''} and waiting for a CV and cover letter to be written.`,
+    tailoring: 'Its CV and cover letter are being written now.',
+    ready: 'Its CV and cover letter are ready and it is waiting to be approved.',
+    approved: 'It is approved and queued to be submitted.',
+    applying: 'It is being submitted right now.',
+    needs_you: `It is waiting on you. ${waiting}`.trim(),
+    skipped: 'It was skipped.',
+    filtered_out: 'It was filtered out.',
+    failed: 'The last attempt failed.',
+  };
+  const where = job.ats === 'linkedin' || job.ats === 'indeed' ? " Pursuit can't submit on LinkedIn or Indeed itself; it is looking for the employer's own application page." : '';
+  return `This application has not been sent. ${stage[job.status] ?? `Status: ${job.status}.`}${where} You will see it under Applied, with a screenshot of the confirmation, when it has gone.`;
+}
+
+/** True when a reply says the application went out although it didn't. */
+export function wronglyClaimsSent(reply: string, status: string): boolean {
+  if (SENT_STATUSES.has(status)) return false;
+  return reply.split(/(?<=[.!?])\s+/).some((sentence) => CLAIMS_SENT.test(sentence) && !DENIES_SENT.test(sentence));
 }
 
 const ReplySchema = z.object({
@@ -59,7 +92,7 @@ export async function jobChatReply(jobId: string, message: string, now: Date = n
       system: [
         `You are Pursuit, Kayzee's assistant for ONE job application: ${job.title} at ${job.company}. Speak plainly and briefly, no em dashes.`,
         'Answer his questions about this application from the CONTEXT only (status, what blocks it, what was prepared, what happened).',
-        'Never claim it was submitted unless the status is applied/replied/interview/offer.',
+        'If APPLICATION SENT says NO, never say or imply it was applied to, submitted or sent. "Found through" is only where the posting was discovered.',
         'If his message answers any OPEN QUESTIONS FOR THIS JOB, return them in "answers" as {n, answer} using his words (option text for option questions).',
         'If he gives a detail only relevant to this job, put it in "note". If he states a general fact about himself, put it in "remember".',
         'Return JSON {"reply": string, "answers": [{n, answer}], "note": string|null, "remember": string|null}.',
@@ -88,7 +121,10 @@ export async function jobChatReply(jobId: string, message: string, now: Date = n
     }
     turn = {
       role: 'pursuit',
-      text: out ? out.reply.replace(/\s+[—–]\s+/g, ', ') : "Sorry, I couldn't reach the AI just now. Try again in a moment.",
+      // A free model once told him an unsent job had been "applied via LinkedIn guest". The status line is the truth.
+      text: !out ? "Sorry, I couldn't reach the AI just now. Try again in a moment."
+        : wronglyClaimsSent(out.reply, job.status) ? unsentStatus(getJob(jobId) ?? job)
+        : out.reply.replace(/\s+[—–]\s+/g, ', '),
       ts: new Date().toISOString(),
       ...(saved.length ? { saved } : {}),
     };

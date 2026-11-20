@@ -22,3 +22,4 @@ config/*.backup.json
 .probe-tmp.mjs
 .pursuit-*
 *.log
+Philip.md
